@@ -113,6 +113,7 @@ Todas instaladas com `flutter pub get`:
 | Mensagens / Chat      | v1     | Chat em tempo real local                       |
 | Avaliações            | ✨ v3  | Estrelas, barras de distribuição, comentários  |
 | Histórico de Preços   | v2     | Gráfico fl_chart por região e período          |
+| **Cotações de Mercado** | ✨ v3.1 | CEPEA, Notícias Agrícolas, Dólar PTAX, B3/ICE |
 | Perfil                | v3     | Estrelas de reputação + mini stats             |
 | Meus Anúncios         | v1     | Gestão por status                              |
 | Novo Anúncio          | v1     | Cadastro de lote                               |
@@ -157,6 +158,35 @@ flutter clean && flutter pub get
 **Mapa não carrega**
 → Verifique conexão com internet (OpenStreetMap requer rede).
 
+**Cotações não carregam**
+→ Suba a API com `docker compose up -d` e execute o app com:
+```bash
+flutter run --dart-define=COTACOES_API_URL=http://localhost:8000
+```
+
+---
+
+## 📈 COTAÇÕES DE MERCADO (API Python + PostgreSQL)
+
+Backend com scraping automático a cada 6 horas:
+
+| Fonte | Dado |
+|-------|------|
+| CEPEA/ESALQ | Arábica + Conilon |
+| Notícias Agrícolas | Preço físico |
+| Banco Central | Dólar PTAX |
+| Investing.com | Futuros ICE (Arábica/Conilon) |
+
+```bash
+# Subir API + PostgreSQL (tabelas criadas automaticamente)
+docker compose up -d --build
+
+# App Flutter apontando para a API
+flutter run --dart-define=COTACOES_API_URL=http://localhost:8000
+```
+
+Deploy na nuvem: veja [DEPLOY.md](DEPLOY.md) e [render.yaml](render.yaml).
+
 ---
 
 ## 📁 ESTRUTURA
@@ -168,6 +198,7 @@ cafe_conecta_flutter/
 │   ├── models/cafe_model.dart          # Todos os modelos
 │   ├── services/
 │   │   ├── database_service.dart       # SQLite CRUD completo
+│   │   ├── cotacoes_service.dart       # API de cotações (HTTP)
 │   │   └── app_state.dart              # Provider global
 │   ├── utils/theme.dart                # Cores e fontes
 │   ├── widgets/cafe_card.dart          # Card + EmptyState
@@ -183,6 +214,7 @@ cafe_conecta_flutter/
 │       ├── nova_proposta_screen.dart   v2
 │       ├── avaliacoes_screen.dart      ✨ v3
 │       ├── historico_precos_screen.dart v2
+│       ├── cotacoes_screen.dart        ✨ v3.1
 │       ├── detalhes_cafe_screen.dart
 │       ├── favoritos_screen.dart
 │       ├── mensagens_screen.dart
@@ -190,6 +222,13 @@ cafe_conecta_flutter/
 │       ├── perfil_screen.dart          v3
 │       ├── meus_anuncios_screen.dart
 │       └── novo_anuncio_screen.dart
+├── backend/                            # API Python FastAPI + scrapers
+│   ├── app/
+│   ├── sql/init.sql                    # Schema PostgreSQL
+│   └── Dockerfile
+├── docker-compose.yml
+├── render.yaml                         # Deploy Render.com
+├── DEPLOY.md
 ├── pubspec.yaml
 └── README.md
 ```

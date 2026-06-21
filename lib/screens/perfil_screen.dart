@@ -9,6 +9,7 @@ import 'login_screen.dart';
 import 'meus_anuncios_screen.dart';
 import 'avaliacoes_screen.dart';
 import 'historico_precos_screen.dart';
+import 'cotacoes_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -186,6 +187,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                 builder: (_) => AvaliacoesScreen(
                                     usuarioId: u.id!,
                                     usuarioNome: u.empresa ?? u.nome)))),
+                    _menuItem(
+                        Icons.trending_up,
+                        'Cotações de Mercado',
+                        () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const CotacoesScreen()))),
                     _menuItem(
                         Icons.show_chart_outlined,
                         'Histórico de Preços',

@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cafe_conecta_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cafe
+      POSTGRES_PASSWORD: cafe123
+      POSTGRES_DB: cafe_conecta
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cafe -d cafe_conecta"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cafe_conecta_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://cafe:cafe123@postgres:5432/cafe_conecta
+      CORS_ORIGINS: "*"
+      SCRAPER_INTERVAL_HOURS: "6"
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-change-me-in-production}
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
