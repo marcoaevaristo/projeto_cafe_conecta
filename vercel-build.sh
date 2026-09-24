@@ -15,5 +15,5 @@ fi
 
 git config --global --add safe.directory "${FLUTTER_DIR}"
 flutter config --enable-web
-flutter pub get
+flutter pub get --enforce-lockfile
 flutter build web --release --base-href /
