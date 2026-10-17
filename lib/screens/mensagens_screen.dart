@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
-import '../services/api_service.dart';
+import '../services/database_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'conversa_screen.dart';
@@ -30,7 +30,7 @@ class _MensagensScreenState extends State<MensagensScreen> {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
     setState(() => _loading = true);
-    final c = await ApiService.getConversas();
+    final c = await DatabaseService.getConversas(u.id!);
     setState(() {
       _conversas = c;
       _loading = false;
