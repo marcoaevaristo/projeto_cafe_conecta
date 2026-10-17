@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'detalhes_cafe_screen.dart';
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _carregar() async {
     setState(() => _loading = true);
-    final cafes = await DatabaseService.getCafes(
+    final cafes = await ApiService.getCafes(
       tipo: _tipoFiltro == 'Todos' ? null : _tipoFiltro,
       classificacao: _classiFiltro == 'Todas' ? null : _classiFiltro,
       scoreMinimo: _scoreMinimo,
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _filtrados.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.search_off,
                           titulo: 'Nenhum café com score ≥ $_scoreMinimo',
                           subtitulo: 'Ajuste o filtro de qualidade.')
@@ -242,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _dropdown(String label, List<String> items, String value,
       void Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       isDense: true,
       decoration: InputDecoration(
           labelText: label,
@@ -260,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final usuario = context.read<AppState>().usuario;
     return FutureBuilder<bool>(
       future: usuario != null
-          ? DatabaseService.isFavorito(usuario.id!, cafe.id!)
+          ? ApiService.isFavorito(cafe.id!)
           : Future.value(false),
       builder: (_, snap) {
         final fav = snap.data ?? false;
@@ -270,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onFavorito: usuario == null
               ? null
               : () async {
-                  await DatabaseService.toggleFavorito(usuario.id!, cafe.id!);
+                  await ApiService.toggleFavorito(cafe.id!);
                   setState(() {});
                 },
           onDetalhes: () => Navigator.push(

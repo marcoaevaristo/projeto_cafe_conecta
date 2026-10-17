@@ -1,4 +1,4 @@
-// lib/models/cafe_model.dart — v3
+// lib/models/cafe_model.dart — v4 (REST)
 
 class CafeModel {
   final int? id;
@@ -37,17 +37,29 @@ class CafeModel {
   });
 
   factory CafeModel.fromMap(Map<String, dynamic> map) => CafeModel(
-    id: map['id'], usuarioId: map['usuario_id'] ?? 0,
-    tipo: map['tipo'] ?? '', classificacao: map['classificacao'] ?? '',
-    quantidade: map['quantidade'] ?? 0, bebida: map['bebida'],
-    peneira: map['peneira'], safra: map['safra'],
-    regiao: map['regiao'] ?? '', cidade: map['cidade'] ?? '',
-    fazenda: map['fazenda'], precoSaca: map['preco_saca']?.toDouble(),
-    status: map['status'] ?? 'ativo', criadoEm: map['criado_em'],
-    corretorNome: map['corretor_nome'], corretorEmpresa: map['corretor_empresa'],
-    corretorTelefone: map['corretor_telefone'], isFavorito: map['is_favorito'] == 1,
-    scoreQualidade: map['score_qualidade'], verificado: (map['verificado'] ?? 0) == 1,
-    lat: map['lat']?.toDouble(), lng: map['lng']?.toDouble(),
+    id: map['id'],
+    usuarioId: map['usuario_id'] ?? 0,
+    tipo: map['tipo'] ?? '',
+    classificacao: map['classificacao'] ?? '',
+    quantidade: map['quantidade'] ?? 0,
+    bebida: map['bebida'],
+    peneira: map['peneira'],
+    safra: map['safra'],
+    regiao: map['regiao'] ?? '',
+    cidade: map['cidade'] ?? '',
+    fazenda: map['fazenda'],
+    precoSaca: (map['preco_saca'] as num?)?.toDouble(),
+    status: map['status'] ?? 'ativo',
+    criadoEm: map['criado_em'],
+    corretorNome: map['corretor_nome'],
+    corretorEmpresa: map['corretor_empresa'],
+    corretorTelefone: map['corretor_telefone'],
+    // API retorna bool; SQLite retornava int
+    isFavorito: map['is_favorito'] == true || map['is_favorito'] == 1,
+    scoreQualidade: map['score_qualidade'],
+    verificado: map['verificado'] == true || map['verificado'] == 1,
+    lat: (map['lat'] as num?)?.toDouble(),
+    lng: (map['lng'] as num?)?.toDouble(),
   );
 
   Map<String, dynamic> toMap() => {
@@ -79,25 +91,37 @@ class UsuarioModel {
   final String? empresa;
   final String? telefone;
   final String? regiao;
+  final String? cidade;
+  final String? estado;
+  final String? plano;
   final bool verificado;
 
   UsuarioModel({
     this.id, required this.nome, required this.email,
     required this.tipo, this.empresa, this.telefone,
-    this.regiao, this.verificado = false,
+    this.regiao, this.cidade, this.estado, this.plano,
+    this.verificado = false,
   });
 
   factory UsuarioModel.fromMap(Map<String, dynamic> map) => UsuarioModel(
-    id: map['id'], nome: map['nome'] ?? '', email: map['email'] ?? '',
-    tipo: map['tipo'] ?? 'comprador', empresa: map['empresa'],
-    telefone: map['telefone'], regiao: map['regiao'],
-    verificado: (map['verificado'] ?? 0) == 1,
+    id: map['id'],
+    nome: map['nome'] ?? '',
+    email: map['email'] ?? '',
+    tipo: map['tipo'] ?? 'comprador',
+    empresa: map['empresa'],
+    telefone: map['telefone'],
+    regiao: map['regiao'],
+    cidade: map['cidade'],
+    estado: map['estado'],
+    plano: map['plano'],
+    verificado: map['verificado'] == true || map['verificado'] == 1,
   );
 
   Map<String, dynamic> toMap() => {
     if (id != null) 'id': id,
     'nome': nome, 'email': email, 'tipo': tipo,
     'empresa': empresa, 'telefone': telefone, 'regiao': regiao,
+    'cidade': cidade, 'estado': estado, 'plano': plano,
     'verificado': verificado ? 1 : 0,
   };
 }
@@ -119,10 +143,14 @@ class MensagemModel {
   });
 
   factory MensagemModel.fromMap(Map<String, dynamic> map) => MensagemModel(
-    id: map['id'], deUsuarioId: map['de_usuario_id'] ?? 0,
-    paraUsuarioId: map['para_usuario_id'] ?? 0, texto: map['texto'] ?? '',
-    lida: (map['lida'] ?? 0) == 1, criadoEm: map['criado_em'],
-    remetenteNome: map['remetente_nome'], remetenteEmpresa: map['remetente_empresa'],
+    id: map['id'],
+    deUsuarioId: map['de_usuario_id'] ?? 0,
+    paraUsuarioId: map['para_usuario_id'] ?? 0,
+    texto: map['texto'] ?? '',
+    lida: map['lida'] == true || map['lida'] == 1,
+    criadoEm: map['criado_em'],
+    remetenteNome: map['remetente_nome'],
+    remetenteEmpresa: map['remetente_empresa'],
   );
 }
 
@@ -144,10 +172,14 @@ class AlertaModel {
   });
 
   factory AlertaModel.fromMap(Map<String, dynamic> map) => AlertaModel(
-    id: map['id'], usuarioId: map['usuario_id'] ?? 0,
-    tipoCafe: map['tipo_cafe'], classificacao: map['classificacao'],
-    regiao: map['regiao'], precoMaximo: map['preco_maximo']?.toDouble(),
-    scoreMinimo: map['score_minimo'], ativo: (map['ativo'] ?? 1) == 1,
+    id: map['id'],
+    usuarioId: map['usuario_id'] ?? 0,
+    tipoCafe: map['tipo_cafe'],
+    classificacao: map['classificacao'],
+    regiao: map['regiao'],
+    precoMaximo: (map['preco_maximo'] as num?)?.toDouble(),
+    scoreMinimo: map['score_minimo'],
+    ativo: map['ativo'] == true || map['ativo'] == 1,
     criadoEm: map['criado_em'],
   );
 
@@ -199,16 +231,22 @@ class PropostaModel {
   double get valorTotal => quantidadeSacas * precoOfertado;
 
   factory PropostaModel.fromMap(Map<String, dynamic> map) => PropostaModel(
-    id: map['id'], deUsuarioId: map['de_usuario_id'] ?? 0,
-    paraUsuarioId: map['para_usuario_id'] ?? 0, cafeId: map['cafe_id'] ?? 0,
+    id: map['id'],
+    deUsuarioId: map['de_usuario_id'] ?? 0,
+    paraUsuarioId: map['para_usuario_id'] ?? 0,
+    cafeId: map['cafe_id'] ?? 0,
     quantidadeSacas: map['quantidade_sacas'] ?? 0,
-    precoOfertado: map['preco_ofertado']?.toDouble() ?? 0,
+    precoOfertado: (map['preco_ofertado'] as num?)?.toDouble() ?? 0,
     condicaoPagamento: map['condicao_pagamento'] ?? '',
     prazoEntrega: map['prazo_entrega'] ?? '',
-    localEntrega: map['local_entrega'], observacoes: map['observacoes'],
-    status: map['status'] ?? 'aguardando', criadoEm: map['criado_em'],
-    remetenteNome: map['remetente_nome'], remetenteEmpresa: map['remetente_empresa'],
-    cafeTipo: map['cafe_tipo'], cafeClassificacao: map['cafe_classificacao'],
+    localEntrega: map['local_entrega'],
+    observacoes: map['observacoes'],
+    status: map['status'] ?? 'aguardando',
+    criadoEm: map['criado_em'],
+    remetenteNome: map['remetente_nome'],
+    remetenteEmpresa: map['remetente_empresa'],
+    cafeTipo: map['cafe_tipo'],
+    cafeClassificacao: map['cafe_classificacao'],
     cafeFazenda: map['cafe_fazenda'],
   );
 
@@ -235,8 +273,10 @@ class HistoricoPrecoModel {
   });
 
   factory HistoricoPrecoModel.fromMap(Map<String, dynamic> map) => HistoricoPrecoModel(
-    id: map['id'], tipoCafe: map['tipo_cafe'] ?? '',
-    regiao: map['regiao'] ?? '', precoMedio: map['preco_medio']?.toDouble() ?? 0,
+    id: map['id'],
+    tipoCafe: map['tipo_cafe'] ?? '',
+    regiao: map['regiao'] ?? '',
+    precoMedio: (map['preco_medio'] as num?)?.toDouble() ?? 0,
     mes: map['mes'] ?? '',
   );
 
@@ -247,13 +287,12 @@ class HistoricoPrecoModel {
   };
 }
 
-// ─── v3: Avaliação ────────────────────────────────
 class AvaliacaoModel {
   final int? id;
   final int deUsuarioId;
   final int paraUsuarioId;
   final int propostaId;
-  final int nota; // 1-5
+  final int nota;
   final String? comentario;
   final String? criadoEm;
   final String? avaliadorNome;
@@ -267,11 +306,15 @@ class AvaliacaoModel {
   });
 
   factory AvaliacaoModel.fromMap(Map<String, dynamic> map) => AvaliacaoModel(
-    id: map['id'], deUsuarioId: map['de_usuario_id'] ?? 0,
+    id: map['id'],
+    deUsuarioId: map['de_usuario_id'] ?? 0,
     paraUsuarioId: map['para_usuario_id'] ?? 0,
-    propostaId: map['proposta_id'] ?? 0, nota: map['nota'] ?? 5,
-    comentario: map['comentario'], criadoEm: map['criado_em'],
-    avaliadorNome: map['avaliador_nome'], avaliadorEmpresa: map['avaliador_empresa'],
+    propostaId: map['proposta_id'] ?? 0,
+    nota: map['nota'] ?? 5,
+    comentario: map['comentario'],
+    criadoEm: map['criado_em'],
+    avaliadorNome: map['avaliador_nome'],
+    avaliadorEmpresa: map['avaliador_empresa'],
   );
 
   Map<String, dynamic> toMap() => {

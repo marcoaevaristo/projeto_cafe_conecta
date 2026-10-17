@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 
@@ -21,7 +21,7 @@ class _AlertasScreenState extends State<AlertasScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final list = await DatabaseService.getAlertas(u.id!);
+    final list = await ApiService.getAlertas();
     setState(() => _alertas = list);
   }
 
@@ -34,7 +34,7 @@ class _AlertasScreenState extends State<AlertasScreen> {
       body: !logado
         ? const EmptyState(icon: Icons.notifications_off_outlined, titulo: 'Faça login para usar alertas')
         : _alertas.isEmpty
-          ? const EmptyState(
+          ? EmptyState(
               icon: Icons.notifications_outlined,
               titulo: 'Nenhum alerta configurado',
               subtitulo: 'Crie alertas para ser notificado quando surgirem lotes no seu perfil.',
@@ -45,8 +45,8 @@ class _AlertasScreenState extends State<AlertasScreen> {
                   style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast))),
               Expanded(child: RefreshIndicator(onRefresh: _carregar, child: ListView(children: [
                 ..._alertas.map((a) => _AlertaTile(alerta: a,
-                  onToggle: (val) async { await DatabaseService.toggleAlerta(a.id!, val); _carregar(); },
-                  onDelete: () async { await DatabaseService.excluirAlerta(a.id!); _carregar(); })),
+                  onToggle: (val) async { await ApiService.toggleAlerta(a.id!, val); _carregar(); },
+                  onDelete: () async { await ApiService.excluirAlerta(a.id!); _carregar(); })),
                 Padding(
                   padding: const EdgeInsets.all(14),
                   child: OutlinedButton.icon(
@@ -87,32 +87,66 @@ class _AlertaTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-    child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), child: Row(children: [
-      Container(width: 38, height: 38, decoration: BoxDecoration(
-        color: CafeColors.gold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: CafeColors.gold.withValues(alpha: 0.2))),
-        child: Center(child: Text(_icon, style: const TextStyle(fontSize: 16)))),
-      const SizedBox(width: 12),
-      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(_titulo, style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600, color: CafeColors.darkRoast)),
-        Text(_subtitulo, style: GoogleFonts.dmSans(fontSize: 11, color: CafeColors.lightRoast)),
-        Container(margin: const EdgeInsets.only(top: 4), padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-          decoration: BoxDecoration(
-            color: alerta.ativo ? CafeColors.greenOk.withValues(alpha: 0.1) : CafeColors.lightRoast.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: alerta.ativo ? CafeColors.greenOk.withValues(alpha: 0.3) : CafeColors.lightRoast.withValues(alpha: 0.2))),
-          child: Text(alerta.ativo ? '● Ativo' : '● Pausado',
-            style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w600,
-              color: alerta.ativo ? CafeColors.greenOk : CafeColors.lightRoast))),
-      ])),
-      Column(children: [
-        Switch(value: alerta.ativo, onChanged: onToggle, activeColor: CafeColors.greenOk),
-        GestureDetector(onTap: onDelete, child: Icon(Icons.delete_outline, size: 18, color: CafeColors.redAlert.withValues(alpha: 0.6))),
-      ])),
-    ])),
-  );
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: CafeColors.gold.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(color: CafeColors.gold.withValues(alpha: 0.2)),
+              ),
+              child: Center(child: Text(_icon, style: const TextStyle(fontSize: 16))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_titulo, style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600, color: CafeColors.darkRoast)),
+                  Text(_subtitulo, style: GoogleFonts.dmSans(fontSize: 11, color: CafeColors.lightRoast)),
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: alerta.ativo ? CafeColors.greenOk.withValues(alpha: 0.1) : CafeColors.lightRoast.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: alerta.ativo ? CafeColors.greenOk.withValues(alpha: 0.3) : CafeColors.lightRoast.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Text(
+                      alerta.ativo ? '● Ativo' : '● Pausado',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: alerta.ativo ? CafeColors.greenOk : CafeColors.lightRoast,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              children: [
+                Switch(value: alerta.ativo, onChanged: onToggle, activeThumbColor: CafeColors.greenOk),
+                GestureDetector(
+                  onTap: onDelete,
+                  child: Icon(Icons.delete_outline, size: 18, color: CafeColors.redAlert.withValues(alpha: 0.6)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   String get _titulo {
     final p = [if (alerta.tipoCafe != null) alerta.tipoCafe!, if (alerta.classificacao != null) alerta.classificacao!];
@@ -173,7 +207,7 @@ class _NovoAlertaSheetState extends State<_NovoAlertaSheet> {
   }
 
   Widget _drop(String label, List<String> items, String? val, void Function(String?) onChange) =>
-    DropdownButtonFormField<String>(value: val,
+    DropdownButtonFormField<String>(initialValue: val,
       decoration: InputDecoration(labelText: label, isDense: true),
       items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: GoogleFonts.dmSans(fontSize: 13)))).toList(),
       onChanged: onChange);
@@ -183,7 +217,7 @@ class _NovoAlertaSheetState extends State<_NovoAlertaSheet> {
       usuarioId: widget.usuarioId, tipoCafe: _tipo, classificacao: _classif, regiao: _regiao,
       precoMaximo: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
       scoreMinimo: int.tryParse(_scoreCtrl.text));
-    await DatabaseService.inserirAlerta(alerta);
+    await ApiService.inserirAlerta(alerta);
     if (mounted) { Navigator.pop(context); widget.onSaved(); }
   }
 }

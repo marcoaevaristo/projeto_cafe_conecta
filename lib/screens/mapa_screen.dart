@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/cafe_model.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import 'detalhes_cafe_screen.dart';
 
@@ -29,7 +29,7 @@ class _MapaScreenState extends State<MapaScreen> {
   }
 
   Future<void> _carregar() async {
-    final cafes = await DatabaseService.getCafes(
+    final cafes = await ApiService.getCafes(
       tipo: _filtroTipo == 'Todos' ? null : _filtroTipo,
     );
     setState(() {

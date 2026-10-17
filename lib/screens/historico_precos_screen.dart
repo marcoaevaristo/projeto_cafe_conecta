@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/cafe_model.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 
 class HistoricoPrecosScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
   }
 
   Future<void> _carregar() async {
-    final d = await DatabaseService.getHistoricoPrecos();
+    final d = await ApiService.getHistoricoPrecos();
     setState(() => _dados = d);
   }
 
@@ -106,13 +106,13 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
                 isUp: _variacaoSul >= 0,
                 period: '30d'),
             const SizedBox(width: 10),
-            _SumCard(
+            const _SumCard(
                 label: 'Cerrado Min.',
                 value: '+5,1%',
                 isUp: true,
                 period: '30d'),
             const SizedBox(width: 10),
-            _SumCard(
+            const _SumCard(
                 label: 'Zona da Mata',
                 value: '-2,4%',
                 isUp: false,

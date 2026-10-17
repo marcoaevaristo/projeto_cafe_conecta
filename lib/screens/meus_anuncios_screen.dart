@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'detalhes_cafe_screen.dart';
@@ -89,10 +89,10 @@ class _ListaStatusState extends State<_ListaStatus>
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final list = await DatabaseService.getCafes(
+    final list = await ApiService.getCafes(
       usuarioId: u.id,
-      statusFiltro: widget.status,
-      apenasAtivos: false,
+      status: widget.status,
+
     );
     setState(() => _cafes = list);
   }
@@ -101,7 +101,7 @@ class _ListaStatusState extends State<_ListaStatus>
   Widget build(BuildContext context) {
     super.build(context);
     if (_cafes.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.inventory_2_outlined,
         titulo: 'Nenhum anúncio ${widget.status}',
       );

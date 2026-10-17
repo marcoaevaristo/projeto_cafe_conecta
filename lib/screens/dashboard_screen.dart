@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 
@@ -29,8 +29,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final stats = await DatabaseService.getDashboard(u.id!);
-    final hist = await DatabaseService.getHistoricoPrecos();
+    final stats = await ApiService.getDashboard();
+    final hist = await ApiService.getHistoricoPrecos();
     setState(() {
       _stats = stats;
       _historico = hist;
@@ -96,25 +96,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisSpacing: 10,
                       childAspectRatio: 1.6,
                       children: [
-                        const _KpiCard(
+                        _KpiCard(
                             icon: '☕',
                             label: 'Lotes Ativos',
                             value: '${_stats['lotes_ativos'] ?? 0}',
                             delta: '+12 este mês',
                             color: CafeColors.caramel),
-                        const _KpiCard(
+                        _KpiCard(
                             icon: '👁',
                             label: 'Visualizações',
                             value: '${_stats['visualizacoes'] ?? 0}',
                             delta: '+18% este mês',
                             color: CafeColors.blue),
-                        const _KpiCard(
+                        _KpiCard(
                             icon: '📋',
                             label: 'Propostas',
                             value: '${_stats['propostas_recebidas'] ?? 0}',
                             delta: '+3 esta semana',
                             color: CafeColors.gold),
-                        const _KpiCard(
+                        _KpiCard(
                             icon: '🤝',
                             label: 'Negócios',
                             value: '${_stats['negocios_fechados'] ?? 0}',
@@ -160,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       fontWeight: FontWeight.w900,
                                       color: CafeColors.gold)),
                               const Spacer(),
-                              Icon(Icons.verified,
+                              const Icon(Icons.verified,
                                   color: CafeColors.blue, size: 28),
                             ]))),
                   const SizedBox(height: 14),
@@ -275,7 +275,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         ],
                                       ))),
                                   const SizedBox(width: 16),
-                                  Column(
+                                  const Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
@@ -283,12 +283,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             color: CafeColors.caramel,
                                             label: 'Arábica',
                                             pct: '65%'),
-                                        const SizedBox(height: 8),
+                                        SizedBox(height: 8),
                                         _LegendItem(
                                             color: CafeColors.greenOk,
                                             label: 'Conilon',
                                             pct: '25%'),
-                                        const SizedBox(height: 8),
+                                        SizedBox(height: 8),
                                         _LegendItem(
                                             color: CafeColors.blue,
                                             label: 'Robusta',

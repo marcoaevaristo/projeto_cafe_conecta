@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../widgets/cafe_card.dart';
 import 'detalhes_cafe_screen.dart';
 import 'login_screen.dart';
@@ -27,7 +27,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final list = await DatabaseService.getFavoritos(u.id!);
+    final list = await ApiService.getFavoritos();
     setState(() => _favs = list);
   }
 
@@ -62,8 +62,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                         cafe: cafe,
                         favorito: true,
                         onFavorito: () async {
-                          await DatabaseService.toggleFavorito(
-                              context.read<AppState>().usuario!.id!, cafe.id!);
+                          await ApiService.toggleFavorito(cafe.id!);
                           _carregar();
                         },
                         onDetalhes: () => Navigator.push(

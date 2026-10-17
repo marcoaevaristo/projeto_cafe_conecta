@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import 'classificacao_ia_screen.dart';
 
@@ -61,8 +61,12 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: () async {
-                final res = await Navigator.push(context, MaterialPageRoute(builder: (_) => const ClassificacaoIAScreen()));
-                if (res != null && mounted) setState(() => _classificacao = res as String?);
+                final res = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ClassificacaoIAScreen()));
+                if (res != null && mounted)
+                  setState(() => _classificacao = res as String?);
               },
               icon: const Icon(Icons.smart_toy),
               label: const Text('Analisar com IA'),
@@ -111,7 +115,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         decoration: InputDecoration(labelText: label),
         items: items
             .map((i) => DropdownMenuItem(value: i, child: Text(i)))
@@ -163,7 +167,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       precoSaca: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
     );
 
-    await DatabaseService.inserirCafe(cafe);
+    await ApiService.inserirCafe(cafe);
     if (!mounted) return;
     setState(() => _loading = false);
     ScaffoldMessenger.of(context).showSnackBar(

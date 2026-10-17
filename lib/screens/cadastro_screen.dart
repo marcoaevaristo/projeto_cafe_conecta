@@ -63,7 +63,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 tipo: TextInputType.phone),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _regiao,
+              initialValue: _regiao,
               decoration: const InputDecoration(
                 labelText: 'Região de atuação',
                 prefixIcon: Icon(Icons.location_on_outlined),

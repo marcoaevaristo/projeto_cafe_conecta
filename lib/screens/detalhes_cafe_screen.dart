@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import 'conversa_screen.dart';
 
@@ -31,7 +31,7 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
   Future<void> _checkFavorito() async {
     final u = context.read<AppState>().usuario;
     if (u != null && widget.cafe.id != null) {
-      final f = await DatabaseService.isFavorito(u.id!, widget.cafe.id!);
+      final f = await ApiService.isFavorito(widget.cafe.id!);
       setState(() => _favorito = f);
     }
   }
@@ -54,7 +54,7 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                   icon: Icon(_favorito ? Icons.favorite : Icons.favorite_border,
                       color: _favorito ? Colors.redAccent : CafeColors.cream),
                   onPressed: () async {
-                    await DatabaseService.toggleFavorito(usuario.id!, cafe.id!);
+                    await ApiService.toggleFavorito(cafe.id!);
                     setState(() => _favorito = !_favorito);
                   },
                 ),
@@ -73,7 +73,7 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
-                      Text('☕', style: const TextStyle(fontSize: 56)),
+                      const Text('☕', style: TextStyle(fontSize: 56)),
                       Text(cafe.nomeCurto,
                           style: GoogleFonts.playfairDisplay(
                             color: CafeColors.gold,
@@ -101,15 +101,14 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                              NumberFormat('#,###').format(cafe.quantidade) +
-                                  ' sacas',
+                              '${NumberFormat('#,###').format(cafe.quantidade)} sacas',
                               style: GoogleFonts.playfairDisplay(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 color: CafeColors.caramel,
                               )),
                           if (cafe.precoSaca != null)
-                            Text(_brl.format(cafe.precoSaca) + '/saca',
+                            Text('${_brl.format(cafe.precoSaca)}/saca',
                                 style: GoogleFonts.dmSans(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

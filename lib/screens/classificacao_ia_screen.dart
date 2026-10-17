@@ -7,7 +7,7 @@ import '../services/laudo_service.dart';
 import 'laudo_screen.dart';
 
 class ClassificacaoIAScreen extends StatefulWidget {
-  const ClassificacaoIAScreen({Key? key}) : super(key: key);
+  const ClassificacaoIAScreen({super.key});
 
   @override
   State<ClassificacaoIAScreen> createState() => _ClassificacaoIAScreenState();
@@ -21,22 +21,36 @@ class _ClassificacaoIAScreenState extends State<ClassificacaoIAScreen> {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _tirarFoto() async {
-    final XFile? f = await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final XFile? f =
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
     if (f == null) return;
     setState(() => _image = File(f.path));
   }
 
   Future<void> _analisar() async {
     if (_image == null) return;
-    setState(() { _analisando = true; _resultado = null; });
+    setState(() {
+      _analisando = true;
+      _resultado = null;
+    });
     try {
       final laudo = await LaudoService.generateFromImage(_image!);
-      setState(() { _analisando = false; _resultado = laudo.conteudo; });
+      setState(() {
+        _analisando = false;
+        _resultado = laudo.conteudo;
+      });
       if (!mounted) return;
       // Mostrar laudo e permitir usar resultado
-      await Navigator.push(context, MaterialPageRoute(builder: (_) => LaudoScreen(id: laudo.id, conteudo: laudo.conteudo)));
+      await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) =>
+                  LaudoScreen(id: laudo.id, conteudo: laudo.conteudo)));
     } catch (e) {
-      setState(() { _analisando = false; _resultado = 'Erro: ${e.toString()}'; });
+      setState(() {
+        _analisando = false;
+        _resultado = 'Erro: ${e.toString()}';
+      });
     }
   }
 
@@ -57,7 +71,9 @@ class _ClassificacaoIAScreenState extends State<ClassificacaoIAScreen> {
           if (_resultado != null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text('Resultado: $_resultado', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              child: Text('Resultado: $_resultado',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w600)),
             ),
           Row(children: [
             Expanded(
@@ -70,12 +86,19 @@ class _ClassificacaoIAScreenState extends State<ClassificacaoIAScreen> {
             const SizedBox(width: 12),
             ElevatedButton(
               onPressed: (_image != null && !_analisando) ? _analisar : null,
-              child: _analisando ? const SizedBox(width:20,height:20,child:CircularProgressIndicator(strokeWidth:2)) : const Text('Analisar IA'),
+              child: _analisando
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('Analisar IA'),
             ),
           ]),
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: _resultado == null ? null : () => Navigator.pop(context, _resultado),
+            onPressed: _resultado == null
+                ? null
+                : () => Navigator.pop(context, _resultado),
             child: const Text('Usar resultado'),
           )
         ]),

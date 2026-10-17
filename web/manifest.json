@@ -1,13 +1,15 @@
 {
-    "name": "cafe_conecta",
-    "short_name": "cafe_conecta",
+    "name": "Café Conecta",
+    "short_name": "Café Conecta",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#3E2723",
+    "theme_color": "#6D4C41",
+    "description": "Marketplace de café especial que conecta produtores e compradores.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "lang": "pt-BR",
+    "categories": ["food", "shopping", "business"],
     "icons": [
         {
             "src": "icons/Icon-192.png",

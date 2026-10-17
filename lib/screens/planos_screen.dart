@@ -5,7 +5,7 @@ import '../services/planos_service.dart';
 import '../services/app_state.dart';
 
 class PlanosScreen extends StatelessWidget {
-  const PlanosScreen({Key? key}) : super(key: key);
+  const PlanosScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +19,18 @@ class PlanosScreen extends StatelessWidget {
           final ativo = atual?.id == p.id;
           return ListTile(
             title: Text(p.nome),
-            subtitle: Text('${p.features.join(' · ')}\nR\$ ${p.preco.toStringAsFixed(2)} / mês'),
+            subtitle: Text(
+                '${p.features.join(' · ')}\nR\$ ${p.preco.toStringAsFixed(2)} / mês'),
             isThreeLine: true,
-            trailing: ativo ? const Chip(label: Text('Ativo')) : ElevatedButton(
-              onPressed: () {
-                context.read<AppState>().upgradePlan(p);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Plano ${p.nome} ativado')));
-              },
-              child: const Text('Assinar')),
+            trailing: ativo
+                ? const Chip(label: Text('Ativo'))
+                : ElevatedButton(
+                    onPressed: () {
+                      context.read<AppState>().upgradePlan(p);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Plano ${p.nome} ativado')));
+                    },
+                    child: const Text('Assinar')),
           );
         },
         separatorBuilder: (_, __) => const Divider(),

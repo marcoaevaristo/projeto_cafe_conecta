@@ -10,11 +10,16 @@ class UpgradeGate extends StatelessWidget {
   final Widget child;
   final String? message;
 
-  const UpgradeGate({Key? key, required this.requiredTier, required this.child, this.message}) : super(key: key);
+  const UpgradeGate(
+      {super.key,
+      required this.requiredTier,
+      required this.child,
+      this.message});
 
   @override
   Widget build(BuildContext context) {
-    final has = context.select<AppState, bool>((s) => s.hasAccessForTier(requiredTier));
+    final has =
+        context.select<AppState, bool>((s) => s.hasAccessForTier(requiredTier));
     if (has) return child;
 
     return Card(
@@ -22,10 +27,12 @@ class UpgradeGate extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(message ?? 'Recurso disponível para planos pagos.', textAlign: TextAlign.center),
+          Text(message ?? 'Recurso disponível para planos pagos.',
+              textAlign: TextAlign.center),
           const SizedBox(height: 12),
           ElevatedButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlanosScreen())),
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const PlanosScreen())),
             child: const Text('Ver Planos'),
           )
         ]),

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'avaliacoes_screen.dart';
@@ -32,15 +32,17 @@ class _PropostasScreenState extends State<PropostasScreen>
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final list = await DatabaseService.getPropostas(u.id!);
+    final list = await ApiService.getPropostas();
     setState(() => _propostas = list);
   }
 
   List<PropostaModel> _por(String status) {
-    if (status == 'aguardando')
+    if (status == 'aguardando') {
       return _propostas.where((p) => p.status == 'aguardando').toList();
-    if (status == 'ativas')
+    }
+    if (status == 'ativas') {
       return _propostas.where((p) => p.status == 'aceita').toList();
+    }
     return _propostas
         .where((p) => p.status == 'recusada' || p.status == 'contraproposta')
         .toList();
@@ -103,9 +105,10 @@ class _Lista extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (propostas.isEmpty)
+    if (propostas.isEmpty) {
       return const EmptyState(
           icon: Icons.assignment_outlined, titulo: 'Nenhuma proposta aqui');
+    }
     return RefreshIndicator(
         onRefresh: onRefresh,
         child: ListView.builder(
@@ -311,15 +314,16 @@ class _PropostaCard extends StatelessWidget {
       ]));
 
   Future<void> _aceitar(BuildContext context) async {
-    await DatabaseService.atualizarStatusProposta(proposta.id!, 'aceita');
+    await ApiService.atualizarStatusProposta(proposta.id!, 'aceita');
     await onRefresh();
-    if (context.mounted)
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('✅ Proposta aceita! O comprador foi notificado.')));
+    }
   }
 
   Future<void> _recusar(BuildContext context) async {
-    await DatabaseService.atualizarStatusProposta(proposta.id!, 'recusada');
+    await ApiService.atualizarStatusProposta(proposta.id!, 'recusada');
     await onRefresh();
   }
 
@@ -336,11 +340,12 @@ class _PropostaCard extends StatelessWidget {
   void _avaliar(BuildContext context) async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final jaAvaliou = await DatabaseService.jaAvaliou(u.id!, proposta.id!);
+    final jaAvaliou = await ApiService.jaAvaliou(proposta.id!);
     if (jaAvaliou) {
-      if (context.mounted)
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Você já avaliou esta negociação.')));
+      }
       return;
     }
     if (context.mounted) {
@@ -452,7 +457,7 @@ class _ContrapropostaSheetState extends State<_ContrapropostaSheet> {
             ]),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-                value: _pagamento,
+                initialValue: _pagamento,
                 decoration: const InputDecoration(
                     labelText: 'Condição de pagamento', isDense: true),
                 items: condicoesPagamento
@@ -505,8 +510,8 @@ class _ContrapropostaSheetState extends State<_ContrapropostaSheet> {
       observacoes: _obsCtrl.text.trim().isEmpty ? null : _obsCtrl.text.trim(),
       status: 'contraproposta',
     );
-    await DatabaseService.inserirProposta(novaProposta);
-    await DatabaseService.atualizarStatusProposta(
+    await ApiService.inserirProposta(novaProposta);
+    await ApiService.atualizarStatusProposta(
         widget.proposta.id!, 'contraproposta');
     await widget.onSaved();
     if (mounted) {

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/cafe_model.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 
 class AvaliacoesScreen extends StatefulWidget {
@@ -25,8 +25,8 @@ class _AvaliacoesScreenState extends State<AvaliacoesScreen> {
   }
 
   Future<void> _carregar() async {
-    final avs = await DatabaseService.getAvaliacoes(widget.usuarioId);
-    final res = await DatabaseService.getResumoAvaliacoes(widget.usuarioId);
+    final avs = await ApiService.getAvaliacoes(widget.usuarioId);
+    final res = await ApiService.getResumoAvaliacoes(widget.usuarioId);
     setState(() {
       _avaliacoes = avs;
       _resumo = res;
@@ -269,7 +269,7 @@ class _AvaliarDialogState extends State<AvaliarDialog> {
 
   Future<void> _enviar() async {
     setState(() => _enviando = true);
-    await DatabaseService.inserirAvaliacao(AvaliacaoModel(
+    await ApiService.inserirAvaliacao(AvaliacaoModel(
       deUsuarioId: widget.deUsuarioId,
       paraUsuarioId: widget.paraUsuarioId,
       propostaId: widget.propostaId,
