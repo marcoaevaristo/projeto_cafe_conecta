@@ -28,9 +28,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
-    if (u == null) return;
-    final stats = await ApiService.getDashboard();
-    final hist = await ApiService.getHistoricoPrecos();
+    if (u == null) {
+      setState(() => _loading = false);
+      return;
+    }
+    // Chama as duas APIs de forma independente para que uma falha
+    // não impeça a outra de aparecer no dashboard.
+    Map<String, dynamic> stats = {};
+    List<HistoricoPrecoModel> hist = [];
+    try {
+      stats = await ApiService.getDashboard();
+    } catch (_) {}
+    try {
+      hist = await ApiService.getHistoricoPrecos();
+    } catch (_) {}
+    if (!mounted) return;
     setState(() {
       _stats = stats;
       _historico = hist;
