@@ -73,6 +73,25 @@ class ApiService {
     return data;
   }
 
+  static Future<Map<String, dynamic>> esqueciSenha(String email) async {
+    final res = await http.post(
+      Uri.parse('$_base/auth/esqueci-senha'),
+      headers: _headers(),
+      body: jsonEncode({'email': email}),
+    );
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> resetarSenha(
+      String email, String codigo, String novaSenha) async {
+    final res = await http.post(
+      Uri.parse('$_base/auth/resetar-senha'),
+      headers: _headers(),
+      body: jsonEncode({'email': email, 'codigo': codigo, 'nova_senha': novaSenha}),
+    );
+    return _decode(res);
+  }
+
   static Future<Map<String, dynamic>> getMe() async {
     final h = await _authHeaders();
     final res = await http.get(Uri.parse('$_base/auth/me'), headers: h);

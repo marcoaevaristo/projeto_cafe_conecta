@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'conversa_screen.dart';
@@ -28,13 +28,22 @@ class _MensagensScreenState extends State<MensagensScreen> {
 
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
-    if (u == null) return;
+    if (u == null) {
+      setState(() => _loading = false);
+      return;
+    }
     setState(() => _loading = true);
-    final c = await DatabaseService.getConversas(u.id!);
-    setState(() {
-      _conversas = c;
-      _loading = false;
-    });
+    try {
+      final c = await ApiService.getConversas();
+      if (!mounted) return;
+      setState(() {
+        _conversas = c;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -78,56 +87,44 @@ class _MensagensScreenState extends State<MensagensScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: CircleAvatar(
-        backgroundColor: CafeColors.darkRoast,
+        backgroundColor: CafeColors.caramel.withValues(alpha: 0.15),
         child: Text(
-          (c['contato_nome'] as String? ?? 'U').substring(0, 1).toUpperCase(),
+          (c['outro_nome'] as String? ?? '?')[0].toUpperCase(),
           style: GoogleFonts.playfairDisplay(
-              color: CafeColors.gold, fontWeight: FontWeight.w700),
+              color: CafeColors.darkRoast, fontWeight: FontWeight.w700),
         ),
       ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              c['contato_empresa'] ?? c['contato_nome'] ?? 'Usuário',
-              style: GoogleFonts.dmSans(
-                fontWeight: naoLida ? FontWeight.w700 : FontWeight.w500,
-                color: CafeColors.espresso,
-              ),
-            ),
-          ),
-          if (c['contato_verificado'] == 1)
-            const Icon(Icons.verified, size: 16, color: CafeColors.caramel),
-        ],
+      title: Text(
+        c['outro_nome'] ?? 'Usuário',
+        style: GoogleFonts.dmSans(
+            fontWeight: naoLida ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 14,
+            color: CafeColors.darkRoast),
       ),
       subtitle: Text(
         c['ultima_mensagem'] ?? '',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.dmSans(
-          fontSize: 13,
-          color: naoLida ? CafeColors.darkRoast : CafeColors.lightRoast,
-          fontWeight: naoLida ? FontWeight.w600 : FontWeight.w400,
-        ),
+            fontSize: 12,
+            color: naoLida ? CafeColors.darkRoast : CafeColors.lightRoast,
+            fontWeight: naoLida ? FontWeight.w600 : FontWeight.w400),
       ),
       trailing: naoLida
           ? Container(
               width: 10,
               height: 10,
               decoration: const BoxDecoration(
-                  color: CafeColors.caramel, shape: BoxShape.circle),
-            )
+                  color: CafeColors.caramel, shape: BoxShape.circle))
           : null,
       onTap: () async {
         await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => ConversaScreen(
-                contatoId: c['contato_id'] as int,
-                contatoNome: c['contato_nome'] ?? 'Usuário',
-                contatoEmpresa: c['contato_empresa'],
-              ),
-            ));
+                builder: (_) => ConversaScreen(
+                      contatoId: c['outro_usuario_id'],
+                      contatoNome: c['outro_nome'] ?? 'Usuário',
+                    )));
         _carregar();
       },
     );

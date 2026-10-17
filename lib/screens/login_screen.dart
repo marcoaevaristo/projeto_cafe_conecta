@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../services/app_state.dart';
 import '../utils/theme.dart';
 import 'cadastro_screen.dart';
+import 'esqueci_senha_screen.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -181,6 +182,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2))
                               : const Text('Entrar'),
+                        ),
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const EsqueciSenhaScreen())),
+                          child: Center(
+                            child: Text(
+                              'Esqueci minha senha',
+                              style: GoogleFonts.dmSans(
+                                color: CafeColors.caramel,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: CafeColors.caramel,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),

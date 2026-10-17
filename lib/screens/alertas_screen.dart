@@ -1,10 +1,10 @@
-// lib/screens/alertas_screen.dart — Melhoria 4
+// lib/screens/alertas_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 
@@ -21,8 +21,11 @@ class _AlertasScreenState extends State<AlertasScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final list = await DatabaseService.getAlertas(u.id!);
-    setState(() => _alertas = list);
+    try {
+      final list = await ApiService.getAlertas();
+      if (!mounted) return;
+      setState(() => _alertas = list);
+    } catch (_) {}
   }
 
   @override
@@ -45,8 +48,14 @@ class _AlertasScreenState extends State<AlertasScreen> {
                   style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast))),
               Expanded(child: RefreshIndicator(onRefresh: _carregar, child: ListView(children: [
                 ..._alertas.map((a) => _AlertaTile(alerta: a,
-                  onToggle: (val) async { await DatabaseService.toggleAlerta(a.id!, val); _carregar(); },
-                  onDelete: () async { await DatabaseService.excluirAlerta(a.id!); _carregar(); })),
+                  onToggle: (val) async {
+                    try { await ApiService.toggleAlerta(a.id!, val); } catch (_) {}
+                    _carregar();
+                  },
+                  onDelete: () async {
+                    try { await ApiService.excluirAlerta(a.id!); } catch (_) {}
+                    _carregar();
+                  })),
                 Padding(
                   padding: const EdgeInsets.all(14),
                   child: OutlinedButton.icon(
@@ -69,7 +78,7 @@ class _AlertasScreenState extends State<AlertasScreen> {
     if (u == null) return;
     showModalBottomSheet(context: context, isScrollControlled: true, shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => _NovoAlertaSheet(usuarioId: u.id!, onSaved: _carregar));
+      builder: (_) => _NovoAlertaSheet(onSaved: _carregar));
   }
 }
 
@@ -95,8 +104,7 @@ class _AlertaTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 38, height: 38,
               decoration: BoxDecoration(
                 color: CafeColors.gold.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(9),
@@ -124,8 +132,7 @@ class _AlertaTile extends StatelessWidget {
                     child: Text(
                       alerta.ativo ? '● Ativo' : '● Pausado',
                       style: GoogleFonts.dmSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10, fontWeight: FontWeight.w600,
                         color: alerta.ativo ? CafeColors.greenOk : CafeColors.lightRoast,
                       ),
                     ),
@@ -163,9 +170,8 @@ class _AlertaTile extends StatelessWidget {
 }
 
 class _NovoAlertaSheet extends StatefulWidget {
-  final int usuarioId;
   final VoidCallback onSaved;
-  const _NovoAlertaSheet({required this.usuarioId, required this.onSaved});
+  const _NovoAlertaSheet({required this.onSaved});
   @override State<_NovoAlertaSheet> createState() => _NovoAlertaSheetState();
 }
 
@@ -207,17 +213,22 @@ class _NovoAlertaSheetState extends State<_NovoAlertaSheet> {
   }
 
   Widget _drop(String label, List<String> items, String? val, void Function(String?) onChange) =>
-    DropdownButtonFormField<String>(initialValue: val,
+    DropdownButtonFormField<String>(
+      value: val,
       decoration: InputDecoration(labelText: label, isDense: true),
       items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: GoogleFonts.dmSans(fontSize: 13)))).toList(),
       onChanged: onChange);
 
   Future<void> _salvar() async {
+    final u = context.read<AppState>().usuario;
+    if (u == null) return;
     final alerta = AlertaModel(
-      usuarioId: widget.usuarioId, tipoCafe: _tipo, classificacao: _classif, regiao: _regiao,
+      usuarioId: u.id!, tipoCafe: _tipo, classificacao: _classif, regiao: _regiao,
       precoMaximo: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
       scoreMinimo: int.tryParse(_scoreCtrl.text));
-    await DatabaseService.inserirAlerta(alerta);
+    try {
+      await ApiService.inserirAlerta(alerta);
+    } catch (_) {}
     if (mounted) { Navigator.pop(context); widget.onSaved(); }
   }
 }
