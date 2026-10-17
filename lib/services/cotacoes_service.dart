@@ -129,7 +129,7 @@ class CotacoesAtual {
 class CotacoesService {
   static const _baseUrl = String.fromEnvironment(
     'COTACOES_API_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'https://cafe-conecta-backend.vercel.app',
   );
 
   static Uri _uri(String path, [Map<String, String>? params]) =>
