@@ -182,45 +182,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       CircularProgressIndicator(strokeWidth: 2))
                               : const Text('Entrar'),
                         ),
-                        const SizedBox(height: 12),
-                        // Dica usuários de teste
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: CafeColors.cream,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('👤 Usuários de teste (senha: 123456)',
-                                  style: GoogleFonts.dmSans(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: CafeColors.mediumRoast)),
-                              const SizedBox(height: 4),
-                              ...[
-                                ('Corretor', 'joao@cafesuldeminas.com.br'),
-                                ('Comprador', 'ana@torrefacao.com.br'),
-                              ].map((u) => GestureDetector(
-                                    onTap: () {
-                                      _emailCtrl.text = u.$2;
-                                      _senhaCtrl.text = '123456';
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 2),
-                                      child: Text('${u.$1}: ${u.$2}',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 11,
-                                            color: CafeColors.caramel,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          )),
-                                    ),
-                                  )),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
