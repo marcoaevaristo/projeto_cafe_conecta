@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-FLUTTER_VERSION="3.29.3"
+FLUTTER_VERSION="3.41.9"
 FLUTTER_DIR="${HOME}/flutter"
 
 if ! command -v flutter >/dev/null 2>&1; then
@@ -15,5 +15,5 @@ fi
 
 git config --global --add safe.directory "${FLUTTER_DIR}"
 flutter config --enable-web
-flutter pub get --enforce-lockfile
+flutter pub get
 flutter build web --release --base-href /
