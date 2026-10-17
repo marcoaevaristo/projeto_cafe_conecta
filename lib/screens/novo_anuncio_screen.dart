@@ -167,12 +167,20 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       precoSaca: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
     );
 
-    await ApiService.inserirCafe(cafe);
-    if (!mounted) return;
-    setState(() => _loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('✅ Anúncio publicado com sucesso!')),
-    );
-    Navigator.pop(context);
+    try {
+      await ApiService.inserirCafe(cafe);
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ Anúncio publicado com sucesso!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _erro = 'Erro ao publicar: ${e.toString()}';
+      });
+    }
   }
 }

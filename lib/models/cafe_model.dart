@@ -65,10 +65,11 @@ class CafeModel {
   Map<String, dynamic> toMap() => {
     if (id != null) 'id': id,
     'usuario_id': usuarioId, 'tipo': tipo, 'classificacao': classificacao,
-    'quantidade': quantidade, 'bebida': bebida, 'peneira': peneira, 'safra': safra,
+    'quantidade_sacas': quantidade, // nome esperado pelo backend
+    'bebida': bebida, 'peneira': peneira, 'safra': safra,
     'regiao': regiao, 'cidade': cidade, 'fazenda': fazenda,
     'preco_saca': precoSaca, 'status': status,
-    'score_qualidade': scoreQualidade,
+    'score': scoreQualidade,
     'lat': lat, 'lng': lng,
   };
 
