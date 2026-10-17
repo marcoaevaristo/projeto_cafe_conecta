@@ -115,7 +115,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DropdownButtonFormField<String>(
-        initialValue: value,
+        value: value,
         decoration: InputDecoration(labelText: label),
         items: items
             .map((i) => DropdownMenuItem(value: i, child: Text(i)))
