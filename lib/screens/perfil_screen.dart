@@ -47,7 +47,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     if (!state.logado) {
       return Scaffold(
         appBar: AppBar(title: const Text('Perfil')),
-        body: const EmptyState(
+        body: EmptyState(
             icon: Icons.person_outline,
             titulo: 'Faça login para acessar seu perfil',
             action: ElevatedButton(
@@ -138,17 +138,17 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   // Mini stats
                   if (_dadosCompletos != null)
                     Row(children: [
-                      const _StatMini(
+                      _StatMini(
                           label: 'Lotes ativos',
                           value: '${_dadosCompletos!['lotes_ativos']}',
                           icon: '☕'),
                       const SizedBox(width: 10),
-                      const _StatMini(
+                      _StatMini(
                           label: 'Negócios',
                           value: '${_dadosCompletos!['negocios_fechados']}',
                           icon: '🤝'),
                       const SizedBox(width: 10),
-                      const _StatMini(
+                      _StatMini(
                           label: 'Avaliação',
                           value: '${_dadosCompletos!['media_avaliacao']}⭐',
                           icon: '🏆'),
