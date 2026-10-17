@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/api_service.dart';
+import '../services/database_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 
@@ -21,7 +21,7 @@ class _AlertasScreenState extends State<AlertasScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
-    final list = await ApiService.getAlertas();
+    final list = await DatabaseService.getAlertas(u.id!);
     setState(() => _alertas = list);
   }
 
@@ -45,8 +45,8 @@ class _AlertasScreenState extends State<AlertasScreen> {
                   style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast))),
               Expanded(child: RefreshIndicator(onRefresh: _carregar, child: ListView(children: [
                 ..._alertas.map((a) => _AlertaTile(alerta: a,
-                  onToggle: (val) async { await ApiService.toggleAlerta(a.id!, val); _carregar(); },
-                  onDelete: () async { await ApiService.excluirAlerta(a.id!); _carregar(); })),
+                  onToggle: (val) async { await DatabaseService.toggleAlerta(a.id!, val); _carregar(); },
+                  onDelete: () async { await DatabaseService.excluirAlerta(a.id!); _carregar(); })),
                 Padding(
                   padding: const EdgeInsets.all(14),
                   child: OutlinedButton.icon(
@@ -217,7 +217,7 @@ class _NovoAlertaSheetState extends State<_NovoAlertaSheet> {
       usuarioId: widget.usuarioId, tipoCafe: _tipo, classificacao: _classif, regiao: _regiao,
       precoMaximo: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
       scoreMinimo: int.tryParse(_scoreCtrl.text));
-    await ApiService.inserirAlerta(alerta);
+    await DatabaseService.inserirAlerta(alerta);
     if (mounted) { Navigator.pop(context); widget.onSaved(); }
   }
 }
