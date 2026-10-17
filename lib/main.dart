@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'services/app_state.dart';
 import 'utils/theme.dart';
@@ -19,12 +20,28 @@ class CafeConectaApp extends StatelessWidget {
   const CafeConectaApp({super.key});
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'Café Conecta',
-    debugShowCheckedModeBanner: false,
-    theme: CafeTheme.theme,
-    home: const _Splash(),
-  );
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Café Conecta',
+      debugShowCheckedModeBanner: false,
+      theme: CafeTheme.theme,
+      home: const _Splash(),
+      scrollBehavior: kIsWeb ? const _WebScrollBehavior() : null,
+    );
+  }
+}
+
+class _WebScrollBehavior extends ScrollBehavior {
+  const _WebScrollBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return Scrollbar(
+      controller: details.controller,
+      thumbVisibility: true,
+      child: child,
+    );
+  }
 }
 
 class _Splash extends StatefulWidget {
