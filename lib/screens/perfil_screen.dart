@@ -170,7 +170,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   // Menu
                   Card(
                       child: Column(children: [
-                    if (u.tipo == 'produtor' || u.tipo == 'corretor')
+                    if (u.tipo == 'corretor')
                       _menuItem(
                           Icons.inventory_2_outlined,
                           'Meus Anúncios',
