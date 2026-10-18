@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../utils/theme.dart';
 
 class ConversaScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario!;
     final list =
-        await DatabaseService.getMensagensConversa(u.id!, widget.contatoId);
+        await ApiService.getMensagensConversa(u.id!, widget.contatoId);
     setState(() => _msgs = list);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
@@ -47,7 +47,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
     if (texto.isEmpty) return;
     final u = context.read<AppState>().usuario!;
     _ctrl.clear();
-    await DatabaseService.enviarMensagem(u.id!, widget.contatoId, texto);
+    await ApiService.enviarMensagem(u.id!, widget.contatoId, texto);
     _carregar();
   }
 

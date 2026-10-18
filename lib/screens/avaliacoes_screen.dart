@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 import '../utils/theme.dart';
 
 class AvaliacoesScreen extends StatefulWidget {
-  final int usuarioId;
+  final String usuarioId;
   final String usuarioNome;
   const AvaliacoesScreen(
       {super.key, required this.usuarioId, required this.usuarioNome});
@@ -181,9 +181,9 @@ class _AvaliacoesScreenState extends State<AvaliacoesScreen> {
 
 // Widget para avaliar após negociação
 class AvaliarDialog extends StatefulWidget {
-  final int deUsuarioId;
-  final int paraUsuarioId;
-  final int propostaId;
+  final String deUsuarioId;
+  final String paraUsuarioId;
+  final String propostaId;
   final String nomeAvaliado;
   const AvaliarDialog(
       {super.key,
