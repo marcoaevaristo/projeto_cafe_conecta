@@ -197,8 +197,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 SizedBox(
                                     height: 150,
                                     child: _historico.isEmpty
-                                        ? const Center(
-                                            child: CircularProgressIndicator())
+                                        ? Center(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.show_chart,
+                                                    size: 32,
+                                                    color: CafeColors.lightRoast
+                                                        .withValues(alpha: 0.3)),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  'Sem dados de preço disponíveis',
+                                                  style: GoogleFonts.dmSans(
+                                                      fontSize: 12,
+                                                      color: CafeColors
+                                                          .lightRoast),
+                                                ),
+                                              ],
+                                            ))
                                         : LineChart(_buildChart())),
                               ]))),
                   const SizedBox(height: 14),

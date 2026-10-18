@@ -41,7 +41,7 @@ class CafeModel {
     usuarioId: map['usuario_id'] ?? 0,
     tipo: map['tipo'] ?? '',
     classificacao: map['classificacao'] ?? '',
-    quantidade: map['quantidade'] ?? 0,
+    quantidade: map['quantidade_sacas'] ?? map['quantidade'] ?? 0,
     bebida: map['bebida'],
     peneira: map['peneira'],
     safra: map['safra'],
