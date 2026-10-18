@@ -30,7 +30,7 @@ class _MensagensScreenState extends State<MensagensScreen> {
     final u = context.read<AppState>().usuario;
     if (u == null) return;
     setState(() => _loading = true);
-    final c = await ApiService.getConversas(u.id!);
+    final c = await ApiService.getConversas();
     setState(() {
       _conversas = c;
       _loading = false;
