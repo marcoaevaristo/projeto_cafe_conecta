@@ -35,7 +35,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario!;
     final list =
-        await ApiService.getMensagensConversa(u.id!, widget.contatoId);
+        await ApiService.getMensagensConversa(widget.contatoId);
     setState(() => _msgs = list);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
@@ -47,7 +47,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
     if (texto.isEmpty) return;
     final u = context.read<AppState>().usuario!;
     _ctrl.clear();
-    await ApiService.enviarMensagem(u.id!, widget.contatoId, texto);
+    await ApiService.enviarMensagem(widget.contatoId, texto);
     _carregar();
   }
 
