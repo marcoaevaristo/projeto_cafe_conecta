@@ -11,6 +11,7 @@ import 'avaliacoes_screen.dart';
 import 'historico_precos_screen.dart';
 import 'cotacoes_screen.dart';
 import 'planos_screen.dart';
+import 'planos_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
