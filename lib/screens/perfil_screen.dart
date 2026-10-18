@@ -10,6 +10,7 @@ import 'meus_anuncios_screen.dart';
 import 'avaliacoes_screen.dart';
 import 'historico_precos_screen.dart';
 import 'cotacoes_screen.dart';
+import 'planos_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -205,8 +206,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     _menuItem(
                         Icons.card_membership_outlined,
                         'Assinatura',
-                        () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Em breve!')))),
+                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlanosScreen()))),
                     _menuItem(
                         Icons.settings_outlined,
                         'Configurações',
