@@ -5,11 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
-import '../services/api_service.dart';
+import '../services/database_service.dart';
 import '../utils/theme.dart';
 
 class ConversaScreen extends StatefulWidget {
-  final int contatoId;
+  final String contatoId;
   final String contatoNome;
   final String? contatoEmpresa;
   const ConversaScreen(
@@ -35,7 +35,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario!;
     final list =
-        await ApiService.getMensagensConversa(widget.contatoId);
+        await DatabaseService.getMensagensConversa(u.id!, widget.contatoId);
     setState(() => _msgs = list);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
@@ -47,7 +47,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
     if (texto.isEmpty) return;
     final u = context.read<AppState>().usuario!;
     _ctrl.clear();
-    await ApiService.enviarMensagem(widget.contatoId, texto);
+    await DatabaseService.enviarMensagem(u.id!, widget.contatoId, texto);
     _carregar();
   }
 
@@ -92,7 +92,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
     );
   }
 
-  Widget _buildBubble(MensagemModel msg, int meuId) {
+  Widget _buildBubble(MensagemModel msg, String meuId) {
     final minha = msg.deUsuarioId == meuId;
     return Align(
       alignment: minha ? Alignment.centerRight : Alignment.centerLeft,

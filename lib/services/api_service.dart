@@ -100,14 +100,14 @@ class ApiService {
 
   // ── Cafés ────────────────────────────────────────────────────────────
   static Future<List<CafeModel>> getCafes({
-    int? usuarioId,
+    String? usuarioId,
     String? tipo,
     String? classificacao,
     int? scoreMinimo,
     String? status,
   }) async {
     final params = <String, String>{};
-    if (usuarioId != null) params['usuario_id'] = usuarioId.toString();
+    if (usuarioId != null) params['usuario_id'] = usuarioId;
     if (tipo != null) params['tipo'] = tipo;
     if (classificacao != null) params['classificacao'] = classificacao;
     if (scoreMinimo != null) params['score_minimo'] = scoreMinimo.toString();
@@ -131,7 +131,7 @@ class ApiService {
     _decode(res);
   }
 
-  static Future<void> atualizarStatusCafe(int cafeId, String status) async {
+  static Future<void> atualizarStatusCafe(String cafeId, String status) async {
     final h = await _authHeaders();
     final res = await http.patch(
       Uri.parse('$_base/cafes/$cafeId/status'),
@@ -151,7 +151,7 @@ class ApiService {
   }
 
   /// Verifica se um café está nos favoritos do usuário (busca lista local).
-  static Future<bool> isFavorito(int cafeId) async {
+  static Future<bool> isFavorito(String cafeId) async {
     try {
       final favs = await getFavoritos();
       return favs.any((c) => c.id == cafeId);
@@ -160,7 +160,7 @@ class ApiService {
     }
   }
 
-  static Future<void> toggleFavorito(int cafeId) async {
+  static Future<void> toggleFavorito(String cafeId) async {
     final h = await _authHeaders();
     await http.post(
       Uri.parse('$_base/favoritos/$cafeId'),
@@ -177,7 +177,7 @@ class ApiService {
     return (data as List).cast<Map<String, dynamic>>();
   }
 
-  static Future<List<MensagemModel>> getMensagensConversa(int contatoId) async {
+  static Future<List<MensagemModel>> getMensagensConversa(String contatoId) async {
     final h = await _authHeaders();
     final res = await http.get(Uri.parse('$_base/mensagens/$contatoId'), headers: h);
     final data = jsonDecode(res.body);
@@ -185,7 +185,7 @@ class ApiService {
     return (data as List).map((e) => MensagemModel.fromMap(e)).toList();
   }
 
-  static Future<void> enviarMensagem(int paraId, String texto) async {
+  static Future<void> enviarMensagem(String paraId, String texto) async {
     final h = await _authHeaders();
     final res = await http.post(
       Uri.parse('$_base/mensagens'),
@@ -221,7 +221,7 @@ class ApiService {
     _decode(res);
   }
 
-  static Future<void> toggleAlerta(int alertaId, bool ativo) async {
+  static Future<void> toggleAlerta(String alertaId, bool ativo) async {
     final h = await _authHeaders();
     final res = await http.patch(
       Uri.parse('$_base/alertas/$alertaId'),
@@ -231,7 +231,7 @@ class ApiService {
     _decode(res);
   }
 
-  static Future<void> excluirAlerta(int alertaId) async {
+  static Future<void> excluirAlerta(String alertaId) async {
     final h = await _authHeaders();
     final res = await http.delete(Uri.parse('$_base/alertas/$alertaId'), headers: h);
     _decode(res);
@@ -256,7 +256,7 @@ class ApiService {
     _decode(res);
   }
 
-  static Future<void> atualizarStatusProposta(int propostaId, String status) async {
+  static Future<void> atualizarStatusProposta(String propostaId, String status) async {
     final h = await _authHeaders();
     final res = await http.patch(
       Uri.parse('$_base/propostas/$propostaId/status'),
@@ -266,7 +266,7 @@ class ApiService {
     _decode(res);
   }
 
-  static Future<bool> jaAvaliou(int propostaId) async {
+  static Future<bool> jaAvaliou(String propostaId) async {
     final h = await _authHeaders();
     final res = await http.get(Uri.parse('$_base/avaliacoes/ja-avaliou/$propostaId'), headers: h);
     final data = _decode(res);
@@ -274,7 +274,7 @@ class ApiService {
   }
 
   // ── Avaliações ───────────────────────────────────────────────────────
-  static Future<List<AvaliacaoModel>> getAvaliacoes(int usuarioId) async {
+  static Future<List<AvaliacaoModel>> getAvaliacoes(String usuarioId) async {
     final h = await _authHeaders();
     final res = await http.get(Uri.parse('$_base/avaliacoes/$usuarioId'), headers: h);
     final data = jsonDecode(res.body);
@@ -282,7 +282,7 @@ class ApiService {
     return (data as List).map((e) => AvaliacaoModel.fromMap(e)).toList();
   }
 
-  static Future<Map<String, dynamic>> getResumoAvaliacoes(int usuarioId) async {
+  static Future<Map<String, dynamic>> getResumoAvaliacoes(String usuarioId) async {
     final h = await _authHeaders();
     final res = await http.get(Uri.parse('$_base/avaliacoes/$usuarioId/resumo'), headers: h);
     return _decode(res);
