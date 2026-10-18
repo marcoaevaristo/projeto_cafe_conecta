@@ -7,7 +7,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+import '../services/app_state.dart';
 
 const String _backendUrl = 'https://cafe-conecta-backend.vercel.app';
 
@@ -71,8 +72,8 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     setState(() { _carregando = true; _erro = null; });
 
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('Usuário não autenticado');
+      final user = context.read<AppState>().usuario;
+      if (user == null || user.id == null) throw Exception('Usuário não autenticado');
 
       final resp = await http.post(
         Uri.parse('$_backendUrl/pagbank/criar-assinatura'),
@@ -113,8 +114,8 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     setState(() { _carregando = true; _erro = null; });
 
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('Usuário não autenticado');
+      final user = context.read<AppState>().usuario;
+      if (user == null || user.id == null) throw Exception('Usuário não autenticado');
 
       // ATENÇÃO: Em produção, use o SDK PagBank JS para criptografar o cartão
       // no cliente e enviar apenas o token encrypted ao backend.
