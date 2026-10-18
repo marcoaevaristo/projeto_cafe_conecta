@@ -199,7 +199,7 @@ class ApiService {
     final h = await _authHeaders();
     final res = await http.get(Uri.parse('$_base/mensagens/nao-lidas'), headers: h);
     final data = _decode(res);
-    return data['count'] ?? 0;
+    return (data['count'] ?? data['total'] ?? 0) as int;
   }
 
   // ── Alertas ──────────────────────────────────────────────────────────

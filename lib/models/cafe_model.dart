@@ -242,7 +242,8 @@ class PropostaModel {
     prazoEntrega: map['prazo_entrega'] ?? '',
     localEntrega: map['local_entrega'],
     observacoes: map['observacoes'],
-    status: map['status'] ?? 'aguardando',
+    // o banco usa 'pendente'; o app chama de 'aguardando'
+    status: map['status_app'] ?? (map['status'] == 'pendente' ? 'aguardando' : map['status']) ?? 'aguardando',
     criadoEm: map['criado_em'],
     remetenteNome: map['remetente_nome'],
     remetenteEmpresa: map['remetente_empresa'],

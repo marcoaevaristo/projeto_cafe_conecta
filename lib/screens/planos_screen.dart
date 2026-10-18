@@ -4,6 +4,9 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/app_state.dart';
+import '../services/planos_service.dart';
 import 'checkout_screen.dart';
 
 class PlanosScreen extends StatelessWidget {
@@ -11,6 +14,9 @@ class PlanosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final atual = context.watch<AppState>().planoAtual;
+    VoidCallback? acao(PlanoTipo tipo, String id, double valor) =>
+        atual == tipo ? null : () => _irParaCheckout(context, id, valor);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F0E8),
       appBar: AppBar(
@@ -45,7 +51,8 @@ class PlanosScreen extends StatelessWidget {
                 'Sem fotos nos anúncios',
                 'Sem dashboard analítico',
               ],
-              onAssinar: null, // plano atual ou sem ação
+              atual: atual == PlanoTipo.gratuito,
+              onAssinar: null, // plano gratuito não tem checkout
             ),
             const SizedBox(height: 12),
             _PlanoCard(
@@ -66,7 +73,8 @@ class PlanosScreen extends StatelessWidget {
                 'Sem IA de classificação',
                 'Sem laudo digital',
               ],
-              onAssinar: () => _irParaCheckout(context, 'basico', 29.0),
+              atual: atual == PlanoTipo.basico,
+              onAssinar: acao(PlanoTipo.basico, 'basico', 29.0),
             ),
             const SizedBox(height: 12),
             _PlanoCard(
@@ -88,7 +96,8 @@ class PlanosScreen extends StatelessWidget {
                 'Suporte prioritário',
               ],
               limitacoes: const [],
-              onAssinar: () => _irParaCheckout(context, 'profissional', 79.0),
+              atual: atual == PlanoTipo.profissional,
+              onAssinar: acao(PlanoTipo.profissional, 'profissional', 79.0),
             ),
             const SizedBox(height: 12),
             _PlanoCard(
@@ -108,7 +117,8 @@ class PlanosScreen extends StatelessWidget {
                 'Suporte 24h dedicado',
               ],
               limitacoes: const [],
-              onAssinar: () => _irParaCheckout(context, 'premium', 149.0),
+              atual: atual == PlanoTipo.premium,
+              onAssinar: acao(PlanoTipo.premium, 'premium', 149.0),
             ),
             const SizedBox(height: 24),
           ],
@@ -138,6 +148,7 @@ class _PlanoCard extends StatelessWidget {
   final List<String> recursos;
   final List<String> limitacoes;
   final VoidCallback? onAssinar;
+  final bool atual;
 
   const _PlanoCard({
     required this.nome,
@@ -149,6 +160,7 @@ class _PlanoCard extends StatelessWidget {
     required this.recursos,
     required this.limitacoes,
     required this.onAssinar,
+    this.atual = false,
   });
 
   @override
@@ -233,7 +245,7 @@ class _PlanoCard extends StatelessWidget {
                   ...limitacoes.map((l) => _Item(texto: l, check: false)),
                 ],
                 const SizedBox(height: 12),
-                if (onAssinar != null)
+                if (onAssinar != null && !atual)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -250,7 +262,7 @@ class _PlanoCard extends StatelessWidget {
                               fontSize: 15, fontWeight: FontWeight.bold)),
                     ),
                   )
-                else
+                else if (atual)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 12),
