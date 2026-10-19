@@ -49,7 +49,6 @@ class PlanosService {
         'IA de classificação',
         'Laudo digital + QR Code',
         'Dashboard avançado',
-        'Suporte prioritário',
       ],
     ),
     Plan(
@@ -61,7 +60,6 @@ class PlanosService {
         'Tudo do Profissional',
         'API de integração',
         'Relatórios personalizados',
-        'Gerente de conta dedicado',
         'Selo verificado',
       ],
     ),
