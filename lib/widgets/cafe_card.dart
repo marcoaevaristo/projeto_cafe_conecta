@@ -13,9 +13,10 @@ class CafeCard extends StatelessWidget {
   final VoidCallback? onFavorito;
   final VoidCallback? onDetalhes;
   final VoidCallback? onProposta;
+  final VoidCallback? onMensagem;
 
   const CafeCard({super.key, required this.cafe, this.favorito = false,
-    this.onFavorito, this.onDetalhes, this.onProposta});
+    this.onFavorito, this.onDetalhes, this.onProposta, this.onMensagem});
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +116,18 @@ class CafeCard extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               padding: const EdgeInsets.symmetric(vertical: 9),
               textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w600, fontSize: 12)))),
-        if (onDetalhes != null && onProposta != null) const SizedBox(width: 8),
+        if (onMensagem != null) ...[
+          const SizedBox(width: 8),
+          Expanded(child: OutlinedButton.icon(onPressed: onMensagem,
+            icon: const Icon(Icons.chat_bubble_outline, size: 15),
+            label: const Text('Mensagem'),
+            style: OutlinedButton.styleFrom(foregroundColor: CafeColors.darkRoast,
+              side: const BorderSide(color: CafeColors.caramel),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(vertical: 9),
+              textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w600, fontSize: 12)))),
+        ],
+        if ((onDetalhes != null || onMensagem != null) && onProposta != null) const SizedBox(width: 8),
         if (onProposta != null)
           Expanded(child: ElevatedButton.icon(onPressed: onProposta,
             icon: const Icon(Icons.assignment_outlined, size: 15),

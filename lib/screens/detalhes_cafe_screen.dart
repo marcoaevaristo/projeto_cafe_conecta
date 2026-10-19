@@ -9,7 +9,8 @@ import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
 import '../utils/theme.dart';
-import 'conversa_screen.dart';
+import 'nova_proposta_screen.dart';
+import '../utils/conversa_lote.dart';
 
 class DetalhesCafeScreen extends StatefulWidget {
   final CafeModel cafe;
@@ -42,7 +43,55 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
     final usuario = context.read<AppState>().usuario;
     final meuAnuncio = usuario?.id == cafe.usuarioId;
 
+    final podePropor = usuario != null && !meuAnuncio && usuario.tipo != 'produtor';
     return Scaffold(
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8)],
+          ),
+          child: usuario == null
+              ? Text('Entre na sua conta para conversar ou fazer uma proposta.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.dmSans(fontSize: 13, color: CafeColors.lightRoast))
+              : meuAnuncio
+                  ? Text('Este anúncio é seu.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: CafeColors.lightRoast))
+                  : Row(children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => abrirConversaSobreLote(context, cafe),
+                          icon: const Icon(Icons.chat_bubble_outline),
+                          label: const Text('Mensagem'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: CafeColors.darkRoast,
+                            side: const BorderSide(color: CafeColors.caramel),
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                          ),
+                        ),
+                      ),
+                      if (podePropor) ...[
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => NovaPropostaScreen(cafe: cafe))),
+                            icon: const Icon(Icons.assignment_outlined),
+                            label: const Text('Fazer proposta'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: CafeColors.caramel,
+                              foregroundColor: CafeColors.espresso,
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ]),
+        ),
+      ),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -142,54 +191,28 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                     _linha('Contato', cafe.corretorTelefone ?? '—'),
                   ]),
                   const SizedBox(height: 24),
-                  if (!meuAnuncio && usuario != null) ...[
+                  // Ligar/WhatsApp só quando o anunciante tem telefone cadastrado
+                  if (!meuAnuncio && usuario != null && cafe.corretorTelefone != null) ...[
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: OutlinedButton.icon(
                             onPressed: () => _ligar(cafe.corretorTelefone),
                             icon: const Icon(Icons.phone),
                             label: const Text('Ligar'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CafeColors.greenOk,
-                              foregroundColor: Colors.white,
-                            ),
+                            style: OutlinedButton.styleFrom(foregroundColor: CafeColors.greenOk),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: OutlinedButton.icon(
                             onPressed: () => _whatsapp(cafe.corretorTelefone),
                             icon: const Icon(Icons.chat),
                             label: const Text('WhatsApp'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF25D366),
-                              foregroundColor: Colors.white,
-                            ),
+                            style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF128C7E)),
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ConversaScreen(
-                                contatoId: cafe.usuarioId,
-                                contatoNome: cafe.corretorNome ?? 'Corretor',
-                                contatoEmpresa: cafe.corretorEmpresa,
-                              ),
-                            )),
-                        icon: const Icon(Icons.message_outlined),
-                        label: const Text('Enviar Mensagem no App'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: CafeColors.darkRoast,
-                          side: const BorderSide(color: CafeColors.lightRoast),
-                        ),
-                      ),
                     ),
                   ],
                   const SizedBox(height: 32),

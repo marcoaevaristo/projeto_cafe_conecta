@@ -9,6 +9,7 @@ import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'detalhes_cafe_screen.dart';
 import 'nova_proposta_screen.dart';
+import '../utils/conversa_lote.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -277,6 +278,10 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                   builder: (_) => DetalhesCafeScreen(cafe: cafe))),
+          // Conversar com quem anunciou (não aparece no próprio lote)
+          onMensagem: usuario == null || cafe.usuarioId == usuario.id
+              ? null
+              : () => abrirConversaSobreLote(context, cafe),
           // Produtor só vende: não faz propostas de compra
           onProposta: usuario == null ||
                   cafe.usuarioId == usuario.id ||

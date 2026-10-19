@@ -12,11 +12,14 @@ class ConversaScreen extends StatefulWidget {
   final String contatoId;
   final String contatoNome;
   final String? contatoEmpresa;
+  /// Texto já colocado na caixa de mensagem (ex.: interesse num lote)
+  final String? mensagemInicial;
   const ConversaScreen(
       {super.key,
       required this.contatoId,
       required this.contatoNome,
-      this.contatoEmpresa});
+      this.contatoEmpresa,
+      this.mensagemInicial});
   @override
   State<ConversaScreen> createState() => _ConversaScreenState();
 }
@@ -29,6 +32,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.mensagemInicial != null) _ctrl.text = widget.mensagemInicial!;
     _carregar();
   }
 
