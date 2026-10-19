@@ -15,6 +15,7 @@ import 'planos_screen.dart';
 import 'configuracoes_screen.dart';
 import 'ajuda_screen.dart';
 import 'painel_admin_screen.dart';
+import 'liberar_plano_screen.dart';
 import 'classificacao_ia_screen.dart';
 import '../widgets/upgrade_gate.dart';
 
@@ -195,6 +196,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const PainelAdminScreen()))),
+                    if (u.isAdmin)
+                      _menuItem(
+                          Icons.card_giftcard_outlined,
+                          'Liberar plano (cortesia)',
+                          () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const LiberarPlanoScreen()))),
                     // Todos os tipos podem anunciar (vender)
                       _menuItem(
                           Icons.inventory_2_outlined,

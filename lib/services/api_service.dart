@@ -357,6 +357,26 @@ class ApiService {
     return _decode(res);
   }
 
+  /// Busca usuários por nome ou e-mail (só admin).
+  static Future<List<Map<String, dynamic>>> buscarUsuariosAdmin(String busca) async {
+    final h = await _authHeaders();
+    final res = await http.get(
+        Uri.parse('$_base/admin/usuarios').replace(queryParameters: {'busca': busca}),
+        headers: h);
+    final data = jsonDecode(res.body);
+    if (res.statusCode >= 400) throw ApiException(res.statusCode, (data as Map)['error'] ?? 'Erro');
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  /// Libera um plano sem pagamento até [validoAte] (AAAA-MM-DD); 'gratuito' remove a liberação.
+  static Future<Map<String, dynamic>> liberarPlanoAdmin(
+      String usuarioId, String plano, String? validoAte) async {
+    final h = await _authHeaders();
+    final res = await http.post(Uri.parse('$_base/admin/usuarios/$usuarioId/plano'),
+        headers: h, body: jsonEncode({'plano': plano, 'valido_ate': validoAte}));
+    return _decode(res);
+  }
+
   // ── Configurações da conta ───────────────────────────────────────────
   static Future<void> atualizarPerfil(Map<String, dynamic> dados) async {
     final h = await _authHeaders();

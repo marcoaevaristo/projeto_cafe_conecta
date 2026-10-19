@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 import '../utils/erros.dart';
 import '../utils/theme.dart';
+import 'liberar_plano_screen.dart';
 
 final _brl = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
 final _data = DateFormat('dd/MM HH:mm');
@@ -89,6 +90,27 @@ class _PainelAdminScreenState extends State<PainelAdminScreen> {
         _Kpi('Cortesias', '${rec['cortesias']}', 'plano pago sem pagamento'),
       ]),
       _distribuicao('Assinaturas por situação', rec['assinaturas_por_status'], _nomeStatus),
+
+      _secao('Cortesias (plano liberado sem pagamento)'),
+      _lista(
+        ((rec['lista_cortesias'] as List?) ?? []).cast<Map<String, dynamic>>(),
+        vazio: 'Nenhuma cortesia ativa.',
+        titulo: (c) => '${c['nome']} · ${_nomePlano[c['plano']] ?? c['plano']}',
+        detalhe: (c) => '${c['email']} · ${c['valido_ate'] == null ? 'sem data final' : 'até ${DateFormat('dd/MM/yyyy').format(DateTime.parse(c['valido_ate']).toLocal())}'}',
+      ),
+      const SizedBox(height: 8),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: OutlinedButton.icon(
+          onPressed: () async {
+            await Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const LiberarPlanoScreen()));
+            _carregar();
+          },
+          icon: const Icon(Icons.card_giftcard_outlined),
+          label: const Text('Liberar plano para um usuário'),
+        ),
+      ),
 
       _secao('Acessos'),
       if (a['disponivel'] != true)
