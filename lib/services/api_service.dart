@@ -339,6 +339,31 @@ class ApiService {
     _decode(res);
   }
 
+  // ── Configurações da conta ───────────────────────────────────────────
+  static Future<void> atualizarPerfil(Map<String, dynamic> dados) async {
+    final h = await _authHeaders();
+    final res = await http.put(Uri.parse('$_base/auth/perfil'),
+        headers: h, body: jsonEncode(dados));
+    _decode(res);
+  }
+
+  static Future<void> trocarSenha(String senhaAtual, String novaSenha) async {
+    final h = await _authHeaders();
+    final res = await http.post(Uri.parse('$_base/auth/trocar-senha'),
+        headers: h,
+        body: jsonEncode({'senha_atual': senhaAtual, 'nova_senha': novaSenha}));
+    _decode(res);
+  }
+
+  /// Exclui a conta e todos os dados ligados a ela. Exige a senha.
+  static Future<void> excluirConta(String senha) async {
+    final h = await _authHeaders();
+    final res = await http.delete(Uri.parse('$_base/auth/conta'),
+        headers: h, body: jsonEncode({'senha': senha}));
+    _decode(res);
+    await clearToken();
+  }
+
   // ── Assinatura (PagBank) ─────────────────────────────────────────────
   /// Cria o pedido no PagBank para o usuário logado.
   static Future<Map<String, dynamic>> criarAssinatura(Map<String, dynamic> dados) async {

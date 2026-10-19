@@ -12,6 +12,8 @@ import 'avaliacoes_screen.dart';
 import 'historico_precos_screen.dart';
 import 'cotacoes_screen.dart';
 import 'planos_screen.dart';
+import 'configuracoes_screen.dart';
+import 'ajuda_screen.dart';
 import 'classificacao_ia_screen.dart';
 import '../widgets/upgrade_gate.dart';
 
@@ -234,13 +236,17 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     _menuItem(
                         Icons.settings_outlined,
                         'Configurações',
-                        () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Em breve!')))),
+                        () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const ConfiguracoesScreen()))),
                     _menuItem(
                         Icons.help_outline,
-                        'Ajuda e Suporte',
-                        () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Em breve!')))),
+                        'Ajuda',
+                        () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const AjudaScreen()))),
                   ])),
                   const SizedBox(height: 14),
                   SizedBox(
