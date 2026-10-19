@@ -49,8 +49,20 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     valor: 'corretor',
                     selecionado: _tipo,
                     onTap: (v) => setState(() => _tipo = v)),
+                const SizedBox(width: 10),
+                _TipoBtn(
+                    label: '🌱 Produtor',
+                    valor: 'produtor',
+                    selecionado: _tipo,
+                    onTap: (v) => setState(() => _tipo = v)),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(
+                _tipo == 'produtor'
+                    ? 'Produtor anuncia e vende seus lotes.'
+                    : 'Pode comprar (fazer propostas) e também anunciar lotes para vender.',
+                style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast)),
             const SizedBox(height: 20),
             _secao('Seus Dados'),
             _campo(_nomeCtrl, 'Nome completo', Icons.person_outline),
