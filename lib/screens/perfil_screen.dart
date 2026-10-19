@@ -9,15 +9,8 @@ import '../widgets/cafe_card.dart';
 import 'login_screen.dart';
 import 'meus_anuncios_screen.dart';
 import 'avaliacoes_screen.dart';
-import 'historico_precos_screen.dart';
-import 'cotacoes_screen.dart';
 import 'planos_screen.dart';
 import 'configuracoes_screen.dart';
-import 'ajuda_screen.dart';
-import 'painel_admin_screen.dart';
-import 'liberar_plano_screen.dart';
-import 'classificacao_ia_screen.dart';
-import '../widgets/upgrade_gate.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -188,22 +181,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   // Menu
                   Card(
                       child: Column(children: [
-                    if (u.isAdmin)
-                      _menuItem(
-                          Icons.insights_outlined,
-                          'Painel do desenvolvedor',
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const PainelAdminScreen()))),
-                    if (u.isAdmin)
-                      _menuItem(
-                          Icons.card_giftcard_outlined,
-                          'Liberar plano (cortesia)',
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const LiberarPlanoScreen()))),
                     // Todos os tipos podem anunciar (vender)
                       _menuItem(
                           Icons.inventory_2_outlined,
@@ -213,13 +190,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                               MaterialPageRoute(
                                   builder: (_) => const MeusAnunciosScreen()))),
                     _menuItem(
-                        Icons.smart_toy_outlined,
-                        'Classificação por IA',
-                        () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ClassificacaoIAScreen()))),
-                    _menuItem(
                         Icons.star_outline,
                         'Minhas Avaliações',
                         () => Navigator.push(
@@ -228,25 +198,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                 builder: (_) => AvaliacoesScreen(
                                     usuarioId: u.id!,
                                     usuarioNome: u.empresa ?? u.nome)))),
-                    _menuItem(
-                        Icons.trending_up,
-                        'Cotações de Mercado',
-                        () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const CotacoesScreen()))),
-                    _menuItem(
-                        Icons.show_chart_outlined,
-                        'Histórico de Preços',
-                        () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const UpgradeGate(
-                                    requiredTier: 1,
-                                    titulo: 'Histórico de Preços',
-                                    message:
-                                        'O histórico de preços faz parte dos planos pagos, a partir do Básico.',
-                                    child: HistoricoPrecosScreen())))),
                     _menuItem(
                         Icons.card_membership_outlined,
                         'Assinatura',
@@ -258,13 +209,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (_) => const ConfiguracoesScreen()))),
-                    _menuItem(
-                        Icons.help_outline,
-                        'Ajuda e contato',
-                        () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const AjudaScreen()))),
                   ])),
                   const SizedBox(height: 14),
                   SizedBox(
