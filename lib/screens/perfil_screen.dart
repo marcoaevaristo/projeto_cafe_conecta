@@ -173,8 +173,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   // Menu
                   Card(
                       child: Column(children: [
-                    // Quem vende (produtor ou corretor) anuncia lotes; comprador não
-                    if (u.tipo != 'comprador')
+                    // Todos os tipos podem anunciar (vender)
                       _menuItem(
                           Icons.inventory_2_outlined,
                           'Meus Anúncios',

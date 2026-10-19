@@ -277,7 +277,10 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                   builder: (_) => DetalhesCafeScreen(cafe: cafe))),
-          onProposta: usuario == null || cafe.usuarioId == usuario.id
+          // Produtor só vende: não faz propostas de compra
+          onProposta: usuario == null ||
+                  cafe.usuarioId == usuario.id ||
+                  usuario.tipo == 'produtor'
               ? null
               : () => Navigator.push(
                   context,
