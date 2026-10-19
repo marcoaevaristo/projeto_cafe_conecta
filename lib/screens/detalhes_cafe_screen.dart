@@ -68,7 +68,9 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: Center(
+                child: cafe.fotos.isNotEmpty
+                    ? _GaleriaFotos(fotos: cafe.fotos)
+                    : Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -272,5 +274,51 @@ class _StatusChip extends StatelessWidget {
       backgroundColor: cfg.$1.withValues(alpha: 0.1),
       side: BorderSide(color: cfg.$1.withValues(alpha: 0.3)),
     );
+  }
+}
+
+
+/// Fotos do lote no topo da tela, com troca por arraste e indicador de posição.
+class _GaleriaFotos extends StatefulWidget {
+  final List<String> fotos;
+  const _GaleriaFotos({required this.fotos});
+  @override
+  State<_GaleriaFotos> createState() => _GaleriaFotosState();
+}
+
+class _GaleriaFotosState extends State<_GaleriaFotos> {
+  int _atual = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(fit: StackFit.expand, children: [
+      PageView.builder(
+        itemCount: widget.fotos.length,
+        onPageChanged: (i) => setState(() => _atual = i),
+        itemBuilder: (_, i) => Image.network(widget.fotos[i],
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                const Center(child: Icon(Icons.broken_image, color: Colors.white54))),
+      ),
+      if (widget.fotos.length > 1)
+        Positioned(
+          bottom: 12,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+                widget.fotos.length,
+                (i) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: i == _atual ? 18 : 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                          color: i == _atual ? CafeColors.gold : Colors.white70,
+                          borderRadius: BorderRadius.circular(4)),
+                    )),
+          ),
+        ),
+    ]);
   }
 }

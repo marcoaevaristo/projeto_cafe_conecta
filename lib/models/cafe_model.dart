@@ -23,6 +23,10 @@ class CafeModel {
   final bool verificado;
   final double? lat;
   final double? lng;
+  /// Lote em destaque na busca (dono com plano Premium)
+  final bool destaque;
+  /// URLs públicas das fotos do lote
+  final List<String> fotos;
 
   CafeModel({
     this.id, required this.usuarioId, required this.tipo,
@@ -34,6 +38,7 @@ class CafeModel {
     this.corretorTelefone, this.isFavorito,
     this.scoreQualidade, this.verificado = false,
     this.lat, this.lng,
+    this.destaque = false, this.fotos = const [],
   });
 
   factory CafeModel.fromMap(Map<String, dynamic> map) => CafeModel(
@@ -60,6 +65,10 @@ class CafeModel {
     verificado: map['verificado'] == true || map['verificado'] == 1,
     lat: (map['lat'] as num?)?.toDouble(),
     lng: (map['lng'] as num?)?.toDouble(),
+    destaque: map['destaque'] == true,
+    fotos: ((map['fotos'] as List?) ?? [if (map['imagem_url'] != null) map['imagem_url']])
+        .map((f) => f.toString())
+        .toList(),
   );
 
   Map<String, dynamic> toMap() => {

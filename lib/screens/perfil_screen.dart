@@ -11,6 +11,7 @@ import 'avaliacoes_screen.dart';
 import 'historico_precos_screen.dart';
 import 'cotacoes_screen.dart';
 import 'planos_screen.dart';
+import 'classificacao_ia_screen.dart';
 import '../widgets/upgrade_gate.dart';
 
 class PerfilScreen extends StatefulWidget {
@@ -172,7 +173,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   // Menu
                   Card(
                       child: Column(children: [
-                    if (u.tipo == 'corretor')
+                    // Quem vende (produtor ou corretor) anuncia lotes; comprador não
+                    if (u.tipo != 'comprador')
                       _menuItem(
                           Icons.inventory_2_outlined,
                           'Meus Anúncios',
@@ -180,6 +182,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const MeusAnunciosScreen()))),
+                    _menuItem(
+                        Icons.smart_toy_outlined,
+                        'Classificação por IA',
+                        () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const ClassificacaoIAScreen()))),
                     _menuItem(
                         Icons.star_outline,
                         'Minhas Avaliações',

@@ -24,21 +24,43 @@ class CafeCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(14), onTap: onDetalhes,
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if (cafe.fotos.isNotEmpty) _foto(),
           _header(), _body(context), _footer(),
         ]),
       ),
     );
   }
 
+  Widget _foto() => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Image.network(cafe.fotos.first,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  Container(color: CafeColors.mediumRoast)),
+        ),
+      );
+
   Widget _header() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: [CafeColors.darkRoast, CafeColors.mediumRoast],
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [CafeColors.darkRoast, CafeColors.mediumRoast],
           begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(14))),
+        // com foto, o arredondamento do topo fica na foto
+        borderRadius: cafe.fotos.isEmpty
+            ? const BorderRadius.vertical(top: Radius.circular(14))
+            : null),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          if (cafe.destaque)
+            Container(
+              margin: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(color: CafeColors.gold, borderRadius: BorderRadius.circular(4)),
+              child: Text('★ DESTAQUE', style: GoogleFonts.dmSans(
+                  color: CafeColors.espresso, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.6))),
           Text(cafe.nomeCurto, style: GoogleFonts.playfairDisplay(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
           if (cafe.fazenda != null)
             Text(cafe.fazenda!, style: GoogleFonts.dmSans(color: CafeColors.caramel, fontSize: 11)),

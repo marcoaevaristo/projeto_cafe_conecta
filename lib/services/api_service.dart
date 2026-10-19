@@ -127,14 +127,45 @@ class ApiService {
     return (data as List).map((e) => CafeModel.fromMap(e)).toList();
   }
 
-  static Future<void> inserirCafe(CafeModel cafe) async {
+  /// Cria o lote e devolve o id gerado (usado para enviar as fotos em seguida).
+  static Future<String?> inserirCafe(CafeModel cafe) async {
     final h = await _authHeaders();
     final res = await http.post(
       Uri.parse('$_base/cafes'),
       headers: h,
       body: jsonEncode(cafe.toMap()),
     );
+    return _decode(res)['id']?.toString();
+  }
+
+  /// Envia uma foto para o lote. A imagem vai em base64 para o backend,
+  /// que guarda no Supabase Storage e respeita o limite de fotos do plano.
+  static Future<void> adicionarFotoCafe(
+      String cafeId, List<int> bytes, String contentType) async {
+    final h = await _authHeaders();
+    final res = await http.post(
+      Uri.parse('$_base/cafes/$cafeId/fotos'),
+      headers: h,
+      body: jsonEncode({'imagem': base64Encode(bytes), 'content_type': contentType}),
+    );
     _decode(res);
+  }
+
+  /// Classificação por IA: devolve tipo, classificacao, peneira, bebida, score,
+  /// defeitos_300g, observacoes, confianca, texto, id e url (página pública do laudo).
+  static Future<Map<String, dynamic>> gerarLaudoIA(
+      List<int> bytes, String contentType, {String? cafeId}) async {
+    final h = await _authHeaders();
+    final res = await http.post(
+      Uri.parse('$_base/ia/laudo'),
+      headers: h,
+      body: jsonEncode({
+        'imagem': base64Encode(bytes),
+        'content_type': contentType,
+        if (cafeId != null) 'cafe_id': cafeId,
+      }),
+    );
+    return _decode(res);
   }
 
   static Future<void> atualizarStatusCafe(String cafeId, String status) async {

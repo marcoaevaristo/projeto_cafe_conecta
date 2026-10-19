@@ -1,7 +1,10 @@
 // lib/screens/novo_anuncio_screen.dart
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
@@ -9,6 +12,7 @@ import '../services/api_service.dart';
 import '../utils/erros.dart';
 import '../utils/theme.dart';
 import 'classificacao_ia_screen.dart';
+import 'planos_screen.dart';
 
 class NovoAnuncioScreen extends StatefulWidget {
   const NovoAnuncioScreen({super.key});
@@ -29,6 +33,105 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
   final _precoCtrl = TextEditingController();
   bool _loading = false;
   String? _erro;
+  int? _score; // vem da classificação por IA
+  final List<({Uint8List bytes, String tipo})> _fotos = [];
+
+  // Fotos por lote em cada plano (tier 0=Grátis … 3=Premium); null = ilimitado
+  static const _limiteFotos = [0, 3, 10, null];
+
+  Future<void> _adicionarFotos() async {
+    final tier = context.read<AppState>().planoTier;
+    final limite = _limiteFotos[tier];
+    final escolhidas = await ImagePicker()
+        .pickMultiImage(maxWidth: 1600, maxHeight: 1600, imageQuality: 80);
+    for (final f in escolhidas) {
+      if (limite != null && _fotos.length >= limite) break;
+      final nome = f.name.toLowerCase();
+      _fotos.add((
+        bytes: await f.readAsBytes(),
+        tipo: f.mimeType ??
+            (nome.endsWith('.png')
+                ? 'image/png'
+                : nome.endsWith('.webp')
+                    ? 'image/webp'
+                    : 'image/jpeg'),
+      ));
+    }
+    if (mounted) setState(() {});
+  }
+
+  // Preenche o formulário com o resultado da IA, só onde o valor existe nas opções
+  void _aplicarLaudo(Map<String, dynamic> r) {
+    String? se(List<String> opcoes, Object? v) =>
+        opcoes.contains(v?.toString()) ? v.toString() : null;
+    setState(() {
+      _tipo = se(tiposCafe, r['tipo']) ?? _tipo;
+      _classificacao = se(classificacoesCafe, r['classificacao']) ?? _classificacao;
+      _bebida = se(bebidasCafe, r['bebida']) ?? _bebida;
+      _peneira = se(peneirasDisponiveis, r['peneira']) ?? _peneira;
+      _score = (r['score'] as num?)?.toInt() ?? _score;
+    });
+  }
+
+  Widget _secaoFotos() {
+    final tier = context.watch<AppState>().planoTier;
+    final limite = _limiteFotos[tier];
+    if (limite == 0) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.lock_outline),
+          title: const Text('Fotos nos anúncios a partir do plano Básico'),
+          trailing: TextButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const PlanosScreen())),
+            child: const Text('Ver planos'),
+          ),
+        ),
+      );
+    }
+    final podeMais = limite == null || _fotos.length < limite;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(limite == null
+          ? '${_fotos.length} foto(s) · ilimitadas no seu plano'
+          : '${_fotos.length} de $limite fotos do seu plano',
+          style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast)),
+      const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        for (var i = 0; i < _fotos.length; i++)
+          Stack(children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.memory(_fotos[i].bytes, width: 88, height: 88, fit: BoxFit.cover),
+            ),
+            Positioned(
+              top: 2,
+              right: 2,
+              child: GestureDetector(
+                onTap: () => setState(() => _fotos.removeAt(i)),
+                child: const CircleAvatar(
+                    radius: 11,
+                    backgroundColor: Colors.black54,
+                    child: Icon(Icons.close, size: 14, color: Colors.white)),
+              ),
+            ),
+          ]),
+        if (podeMais)
+          InkWell(
+            onTap: _adicionarFotos,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: CafeColors.caramel),
+              ),
+              child: const Icon(Icons.add_a_photo_outlined, color: CafeColors.caramel),
+            ),
+          ),
+      ]),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +159,8 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
                 (v) => setState(() => _regiao = v)),
             _campo(_cidadeCtrl, 'Cidade', TextInputType.text),
             _campo(_fazendaCtrl, 'Fazenda / Propriedade', TextInputType.text),
+            _secao('Fotos do lote'),
+            _secaoFotos(),
             _secao('Safra'),
             _drop('Safra', ['2024/2025', '2023/2024', '2022/2023'], _safra,
                 (v) => setState(() => _safra = v)),
@@ -66,8 +171,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (_) => const ClassificacaoIAScreen()));
-                if (res != null && mounted)
-                  setState(() => _classificacao = res as String?);
+                if (res is Map<String, dynamic> && mounted) _aplicarLaudo(res);
               },
               icon: const Icon(Icons.smart_toy),
               label: const Text('Analisar com IA'),
@@ -166,15 +270,35 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       fazenda:
           _fazendaCtrl.text.trim().isEmpty ? null : _fazendaCtrl.text.trim(),
       precoSaca: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
+      scoreQualidade: _score,
     );
 
     try {
-      await ApiService.inserirCafe(cafe);
+      final cafeId = await ApiService.inserirCafe(cafe);
+      // Envia as fotos depois que o lote existe; uma falha não desfaz o anúncio
+      Object? erroFoto;
+      var enviadas = 0;
+      if (cafeId != null) {
+        for (final f in _fotos) {
+          try {
+            await ApiService.adicionarFotoCafe(cafeId, f.bytes, f.tipo);
+            enviadas++;
+          } catch (e) {
+            erroFoto = e;
+            break;
+          }
+        }
+      }
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Anúncio publicado com sucesso!')),
-      );
+      if (erroFoto != null) {
+        mostrarErro(context, erroFoto);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(enviadas > 0
+                ? '✅ Anúncio publicado com $enviadas foto(s)!'
+                : '✅ Anúncio publicado com sucesso!')));
+      }
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
