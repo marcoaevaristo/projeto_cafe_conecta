@@ -16,6 +16,7 @@ class HistoricoPrecosScreen extends StatefulWidget {
 
 class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
   List<HistoricoPrecoModel> _dados = [];
+  bool _carregado = false;
   String _periodo = '6m';
 
   static const regioes = ['Sul de Minas', 'Cerrado Mineiro', 'Zona da Mata'];
@@ -32,8 +33,16 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
   }
 
   Future<void> _carregar() async {
-    final d = await ApiService.getHistoricoPrecos();
-    setState(() => _dados = d);
+    List<HistoricoPrecoModel> d = [];
+    try {
+      d = await ApiService.getHistoricoPrecos();
+    } catch (_) {}
+    if (!mounted) return;
+    // As regiões do gráfico são de arábica: não mistura com conilon/robusta.
+    setState(() {
+      _dados = d.where((h) => h.tipoCafe == 'Arábica').toList();
+      _carregado = true;
+    });
   }
 
   // Períodos liberados por plano (tier 1=Básico, 2=Profissional, 3=Premium)
@@ -57,11 +66,13 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
   List<FlSpot> _spots(String regiao) {
     final meses = _filtrados.map((d) => d.mes).toSet().toList()..sort();
     return meses.asMap().entries.map((e) {
-      final item = _filtrados.firstWhere(
-          (d) => d.mes == e.value && d.regiao == regiao,
-          orElse: () => HistoricoPrecoModel(
-              tipoCafe: '', regiao: regiao, precoMedio: 0, mes: e.value));
-      return FlSpot(e.key.toDouble(), item.precoMedio);
+      final item = _filtrados
+          .where((d) => d.mes == e.value && d.regiao == regiao)
+          .firstOrNull;
+      // mês sem lote nessa região: deixa um buraco em vez de cair para zero
+      return item == null
+          ? FlSpot.nullSpot
+          : FlSpot(e.key.toDouble(), item.precoMedio);
     }).toList();
   }
 
@@ -88,13 +99,25 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
     }).toList();
   }
 
-  double get _variacaoSul {
-    final sul = _filtrados.where((d) => d.regiao == 'Sul de Minas').toList()
+  // Variação do primeiro ao último mês com lotes na região (null = sem dados)
+  double? _variacao(String regiao) {
+    final r = _filtrados.where((d) => d.regiao == regiao).toList()
       ..sort((a, b) => a.mes.compareTo(b.mes));
-    if (sul.length < 2) return 0;
-    return ((sul.last.precoMedio - sul.first.precoMedio) /
-            sul.first.precoMedio) *
+    if (r.length < 2 || r.first.precoMedio == 0) return null;
+    return ((r.last.precoMedio - r.first.precoMedio) / r.first.precoMedio) *
         100;
+  }
+
+  _SumCard _cardRegiao(String regiao, String rotulo) {
+    final v = _variacao(regiao);
+    return _SumCard(
+        label: rotulo,
+        value: v == null
+            ? '—'
+            : '${v >= 0 ? '+' : ''}${v.toStringAsFixed(1).replaceAll('.', ',')}%',
+        isUp: v == null || v >= 0,
+        neutro: v == null,
+        period: _periodo);
   }
 
   @override
@@ -107,25 +130,17 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
         child: Column(children: [
           // Resumo cards
           Row(children: [
-            _SumCard(
-                label: 'Sul de Minas',
-                value:
-                    '${_variacaoSul >= 0 ? '+' : ''}${_variacaoSul.toStringAsFixed(1)}%',
-                isUp: _variacaoSul >= 0,
-                period: '30d'),
+            _cardRegiao('Sul de Minas', 'Sul de Minas'),
             const SizedBox(width: 10),
-            const _SumCard(
-                label: 'Cerrado Min.',
-                value: '+5,1%',
-                isUp: true,
-                period: '30d'),
+            _cardRegiao('Cerrado Mineiro', 'Cerrado Min.'),
             const SizedBox(width: 10),
-            const _SumCard(
-                label: 'Zona da Mata',
-                value: '-2,4%',
-                isUp: false,
-                period: '30d'),
+            _cardRegiao('Zona da Mata', 'Zona da Mata'),
           ]),
+          const SizedBox(height: 8),
+          Text(
+              'Preço médio pedido nos lotes de Arábica anunciados no Café Conecta, por mês de anúncio.',
+              style: GoogleFonts.dmSans(
+                  fontSize: 11, color: CafeColors.lightRoast)),
           const SizedBox(height: 16),
           // Chart card
           Card(
@@ -193,9 +208,17 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
                         const SizedBox(height: 16),
                         SizedBox(
                             height: 200,
-                            child: _dados.isEmpty
+                            child: !_carregado
                                 ? const Center(
                                     child: CircularProgressIndicator())
+                                : _dados.isEmpty
+                                ? Center(
+                                    child: Text(
+                                        'Ainda não há lotes de Arábica anunciados nos últimos meses.',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.dmSans(
+                                            fontSize: 12,
+                                            color: CafeColors.lightRoast)))
                                 : LineChart(LineChartData(
                                     gridData: FlGridData(
                                         show: true,
@@ -294,12 +317,13 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
 
 class _SumCard extends StatelessWidget {
   final String label, value, period;
-  final bool isUp;
+  final bool isUp, neutro;
   const _SumCard(
       {required this.label,
       required this.value,
       required this.isUp,
-      required this.period});
+      required this.period,
+      this.neutro = false});
   @override
   Widget build(BuildContext context) => Expanded(
           child: Card(
@@ -310,7 +334,11 @@ class _SumCard extends StatelessWidget {
               style: GoogleFonts.playfairDisplay(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: isUp ? CafeColors.greenOk : CafeColors.redAlert)),
+                  color: neutro
+                      ? CafeColors.lightRoast
+                      : isUp
+                          ? CafeColors.greenOk
+                          : CafeColors.redAlert)),
           Text(label,
               style: GoogleFonts.dmSans(
                   fontSize: 10, color: CafeColors.lightRoast),

@@ -196,7 +196,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 const SizedBox(height: 14),
                                 SizedBox(
                                     height: 150,
-                                    child: _historico.isEmpty
+                                    child: _sulArabica.isEmpty
                                         ? Center(
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
@@ -330,8 +330,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // Média mensal real dos lotes de Arábica do Sul de Minas anunciados no app
+  Iterable<HistoricoPrecoModel> get _sulArabica => _historico
+      .where((h) => h.regiao == 'Sul de Minas' && h.tipoCafe == 'Arábica');
+
   LineChartData _buildChart() {
-    final sulData = _historico.where((h) => h.regiao == 'Sul de Minas').toList()
+    final sulData = _sulArabica.toList()
       ..sort((a, b) => a.mes.compareTo(b.mes));
     final spots = sulData
         .asMap()

@@ -146,6 +146,17 @@ class CotacoesService {
     throw Exception('Erro ao buscar cotações: ${resp.statusCode}');
   }
 
+  /// Índice Café Conecta: preços reais dos lotes e negócios do próprio app.
+  static Future<Map<String, dynamic>> fetchIndice() async {
+    final resp = await http
+        .get(_uri('/api/cotacoes/indice'))
+        .timeout(const Duration(seconds: 20));
+    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+      return json.decode(resp.body) as Map<String, dynamic>;
+    }
+    throw Exception('Erro ao buscar o índice: ${resp.statusCode}');
+  }
+
   static Future<List<HistoricoPonto>> fetchHistorico({
     String fonte = 'cepea',
     String tipo = 'arabica',
