@@ -189,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: CafeColors.darkRoast)),
-                                Text('Arábica Tipo 6 · últimos 6 meses',
+                                Text('Arábica · média dos lotes anunciados no app',
                                     style: GoogleFonts.dmSans(
                                         fontSize: 11,
                                         color: CafeColors.lightRoast)),
