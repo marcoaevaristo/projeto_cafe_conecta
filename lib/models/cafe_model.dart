@@ -106,13 +106,15 @@ class UsuarioModel {
   final String? plano;
   /// Até quando o plano pago vale (ISO 8601); nulo no gratuito
   final String? planoValidoAte;
+  /// Pode ver o Painel do desenvolvedor
+  final bool isAdmin;
   final bool verificado;
 
   UsuarioModel({
     this.id, required this.nome, required this.email,
     required this.tipo, this.empresa, this.telefone,
     this.regiao, this.cidade, this.estado, this.plano,
-    this.planoValidoAte, this.verificado = false,
+    this.planoValidoAte, this.verificado = false, this.isAdmin = false,
   });
 
   factory UsuarioModel.fromMap(Map<String, dynamic> map) => UsuarioModel(
@@ -127,6 +129,7 @@ class UsuarioModel {
     estado: map['estado'],
     plano: map['plano'],
     planoValidoAte: map['plano_valido_ate'],
+    isAdmin: map['is_admin'] == true,
     verificado: map['verificado'] == true || map['verificado'] == 1,
   );
 

@@ -339,6 +339,24 @@ class ApiService {
     _decode(res);
   }
 
+  // ── Métricas e Painel do desenvolvedor ──────────────────────────────
+  /// Registra que o app foi aberto (com login conta 1 por dia). Nunca lança erro.
+  static Future<void> registrarVisita() async {
+    try {
+      final t = await _token();
+      await http.post(Uri.parse('$_base/metricas/visita'),
+          headers: _headers(auth: t != null, token: t),
+          body: jsonEncode({'plataforma': 'web'}));
+    } catch (_) {}
+  }
+
+  /// Resumo do painel; só responde para contas administradoras.
+  static Future<Map<String, dynamic>> getAdminResumo() async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base/admin/resumo'), headers: h);
+    return _decode(res);
+  }
+
   // ── Configurações da conta ───────────────────────────────────────────
   static Future<void> atualizarPerfil(Map<String, dynamic> dados) async {
     final h = await _authHeaders();

@@ -14,6 +14,7 @@ import 'cotacoes_screen.dart';
 import 'planos_screen.dart';
 import 'configuracoes_screen.dart';
 import 'ajuda_screen.dart';
+import 'painel_admin_screen.dart';
 import 'classificacao_ia_screen.dart';
 import '../widgets/upgrade_gate.dart';
 
@@ -186,6 +187,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   // Menu
                   Card(
                       child: Column(children: [
+                    if (u.isAdmin)
+                      _menuItem(
+                          Icons.insights_outlined,
+                          'Painel do desenvolvedor',
+                          () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const PainelAdminScreen()))),
                     // Todos os tipos podem anunciar (vender)
                       _menuItem(
                           Icons.inventory_2_outlined,

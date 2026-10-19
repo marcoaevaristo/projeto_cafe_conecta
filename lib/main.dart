@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
+import 'services/api_service.dart';
 import 'services/app_state.dart';
 import 'utils/theme.dart';
 import 'screens/login_screen.dart';
@@ -60,6 +61,7 @@ class _SplashState extends State<_Splash> {
   Future<void> _init() async {
     final state = context.read<AppState>();
     await state.tryRestoreSession();
+    ApiService.registrarVisita(); // sem await: não atrasa a abertura
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(

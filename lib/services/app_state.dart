@@ -30,6 +30,7 @@ class AppState extends ChangeNotifier {
   Future<bool> login(String email, String senha) async {
     try {
       final data = await ApiService.login(email, senha);
+      ApiService.registrarVisita(); // conta o acesso do dia já com o usuário
       final me = await ApiService.getMe();
       _usuario = UsuarioModel.fromMap(me);
       _planoAtual = _planoParaPlano(_usuario!.plano);
