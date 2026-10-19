@@ -11,6 +11,7 @@ import 'avaliacoes_screen.dart';
 import 'historico_precos_screen.dart';
 import 'cotacoes_screen.dart';
 import 'planos_screen.dart';
+import '../widgets/upgrade_gate.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -201,8 +202,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) =>
-                                    const HistoricoPrecosScreen()))),
+                                builder: (_) => const UpgradeGate(
+                                    requiredTier: 1,
+                                    titulo: 'Histórico de Preços',
+                                    message:
+                                        'O histórico de preços faz parte dos planos pagos, a partir do Básico.',
+                                    child: HistoricoPrecosScreen())))),
                     _menuItem(
                         Icons.card_membership_outlined,
                         'Assinatura',

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
+import '../utils/erros.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 import 'avaliacoes_screen.dart';
@@ -508,11 +509,18 @@ class _ContrapropostaSheetState extends State<_ContrapropostaSheet> {
       prazoEntrega: widget.proposta.prazoEntrega,
       localEntrega: widget.proposta.localEntrega,
       observacoes: _obsCtrl.text.trim().isEmpty ? null : _obsCtrl.text.trim(),
-      status: 'contraproposta',
+      status: 'aguardando',
     );
-    await ApiService.inserirProposta(novaProposta);
-    await ApiService.atualizarStatusProposta(
-        widget.proposta.id!, 'contraproposta');
+    try {
+      await ApiService.inserirProposta(novaProposta,
+          contrapropostaDe: widget.proposta.id!);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _enviando = false);
+        mostrarErro(context, e);
+      }
+      return;
+    }
     await widget.onSaved();
     if (mounted) {
       Navigator.pop(context);

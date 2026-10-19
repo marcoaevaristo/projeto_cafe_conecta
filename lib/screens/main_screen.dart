@@ -12,6 +12,7 @@ import 'propostas_screen.dart';
 import 'mensagens_screen.dart';
 import 'perfil_screen.dart';
 import 'cotacoes_screen.dart';
+import '../widgets/upgrade_gate.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -25,7 +26,11 @@ class _MainScreenState extends State<MainScreen> {
   final _screens = const [
     DashboardScreen(),
     HomeScreen(),
-    MapaScreen(),
+    UpgradeGate(
+        requiredTier: 2,
+        titulo: 'Mapa de Disponibilidade',
+        message: 'O mapa de disponibilidade faz parte dos planos Profissional e Premium.',
+        child: MapaScreen()),
     CotacoesScreen(),  // ← Cotações integrado como aba
     AlertasScreen(),
     PropostasScreen(),

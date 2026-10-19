@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
+import '../utils/erros.dart';
 import '../utils/theme.dart';
 
 class NovaPropostaScreen extends StatefulWidget {
@@ -355,7 +356,13 @@ class _NovaPropostaScreenState extends State<NovaPropostaScreen> {
       localEntrega: _local,
       observacoes: _obsCtrl.text.isEmpty ? null : _obsCtrl.text,
     );
-    await ApiService.inserirProposta(proposta);
+    try {
+      await ApiService.inserirProposta(proposta);
+    } catch (e) {
+      if (mounted) mostrarErro(context, e);
+      return;
+    }
+    if (!mounted) return;
     final num = DateTime.now().millisecondsSinceEpoch % 1000;
     setState(() {
       _enviada = true;

@@ -4,6 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/cafe_model.dart';
 import '../services/api_service.dart';
+import 'package:provider/provider.dart';
+import '../services/app_state.dart';
 import '../utils/theme.dart';
 
 class HistoricoPrecosScreen extends StatefulWidget {
@@ -34,12 +36,18 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
     setState(() => _dados = d);
   }
 
+  // Períodos liberados por plano (tier 1=Básico, 2=Profissional, 3=Premium)
+  List<String> _periodosDoPlano(int tier) => tier >= 3
+      ? const ['1m', '3m', '6m', '12m']
+      : tier == 2
+          ? const ['1m', '3m', '6m']
+          : const ['1m', '3m'];
+
   List<HistoricoPrecoModel> get _filtrados {
-    final limit = _periodo == '1m'
-        ? 1
-        : _periodo == '3m'
-            ? 3
-            : 6;
+    final permitidos =
+        _periodosDoPlano(context.read<AppState>().planoTier);
+    if (!permitidos.contains(_periodo)) _periodo = permitidos.last;
+    final limit = int.parse(_periodo.replaceAll('m', ''));
     final meses = _dados.map((d) => d.mes).toSet().toList()..sort();
     final mesesFiltro =
         meses.length > limit ? meses.sublist(meses.length - limit) : meses;
@@ -143,7 +151,9 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
                                             color: CafeColors.lightRoast)),
                                   ]),
                               Row(
-                                  children: ['1m', '3m', '6m']
+                                  children: _periodosDoPlano(context
+                                          .watch<AppState>()
+                                          .planoTier)
                                       .map((p) => GestureDetector(
                                             onTap: () =>
                                                 setState(() => _periodo = p),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
+import '../utils/erros.dart';
 import '../utils/theme.dart';
 import 'classificacao_ia_screen.dart';
 
@@ -179,8 +180,9 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _erro = 'Erro ao publicar: ${e.toString()}';
+        _erro = mensagemDeErro(e);
       });
+      mostrarErro(context, e);
     }
   }
 }

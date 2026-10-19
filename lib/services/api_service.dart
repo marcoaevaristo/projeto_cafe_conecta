@@ -9,7 +9,12 @@ const _base = 'https://cafe-conecta-backend.vercel.app';
 class ApiException implements Exception {
   final int statusCode;
   final String message;
-  ApiException(this.statusCode, this.message);
+  /// Ex.: 'LIMITE_PLANO' quando o plano do usuário não permite a ação.
+  final String? codigo;
+  final String? planoNecessario;
+  ApiException(this.statusCode, this.message, {this.codigo, this.planoNecessario});
+
+  bool get limiteDoPlano => codigo == 'LIMITE_PLANO';
   @override
   String toString() => 'ApiException($statusCode): $message';
 }
@@ -45,7 +50,8 @@ class ApiService {
   static Map<String, dynamic> _decode(http.Response res) {
     final body = jsonDecode(res.body);
     if (res.statusCode >= 400) {
-      throw ApiException(res.statusCode, body['error'] ?? 'Erro desconhecido');
+      throw ApiException(res.statusCode, body['error'] ?? 'Erro desconhecido',
+          codigo: body['codigo'], planoNecessario: body['plano_necessario']);
     }
     return body as Map<String, dynamic>;
   }
@@ -246,12 +252,16 @@ class ApiService {
     return (data as List).map((e) => PropostaModel.fromMap(e)).toList();
   }
 
-  static Future<void> inserirProposta(PropostaModel proposta) async {
+  static Future<void> inserirProposta(PropostaModel proposta,
+      {String? contrapropostaDe}) async {
     final h = await _authHeaders();
     final res = await http.post(
       Uri.parse('$_base/propostas'),
       headers: h,
-      body: jsonEncode(proposta.toMap()),
+      body: jsonEncode({
+        ...proposta.toMap(),
+        if (contrapropostaDe != null) 'contraproposta_de': contrapropostaDe,
+      }),
     );
     _decode(res);
   }

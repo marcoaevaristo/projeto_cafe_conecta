@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
+import '../utils/erros.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 
@@ -228,7 +229,9 @@ class _NovoAlertaSheetState extends State<_NovoAlertaSheet> {
       scoreMinimo: int.tryParse(_scoreCtrl.text));
     try {
       await ApiService.inserirAlerta(alerta);
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) mostrarErro(context, e);
+    }
     if (mounted) { Navigator.pop(context); widget.onSaved(); }
   }
 }
