@@ -339,6 +339,23 @@ class ApiService {
     _decode(res);
   }
 
+  // ── Assinatura (PagBank) ─────────────────────────────────────────────
+  /// Cria o pedido no PagBank para o usuário logado.
+  static Future<Map<String, dynamic>> criarAssinatura(Map<String, dynamic> dados) async {
+    final h = await _authHeaders();
+    final res = await http.post(Uri.parse('$_base/pagbank/criar-assinatura'),
+        headers: h, body: jsonEncode(dados));
+    return _decode(res);
+  }
+
+  /// Confirma no PagBank se o pedido já foi pago e, se sim, libera o plano.
+  /// Retorna { situacao: 'pago' | 'pendente' | 'recusado', plano, valido_ate }.
+  static Future<Map<String, dynamic>> verificarPagamento(String orderId) async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base/pagbank/verificar/$orderId'), headers: h);
+    return _decode(res);
+  }
+
   // ── Dashboard ────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getDashboard() async {
     final h = await _authHeaders();

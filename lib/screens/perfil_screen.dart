@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../services/api_service.dart';
 import '../services/app_state.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
@@ -26,19 +27,29 @@ class _PerfilScreenState extends State<PerfilScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _carregar();
+    // roda a cada mudança do AppState; busca os números só uma vez
+    if (!_carregou) {
+      _carregou = true;
+      _carregar();
+    }
   }
+  bool _carregou = false;
 
   Future<void> _carregar() async {
     final u = context.read<AppState>().usuario;
-    if (u?.id != null) {
-      // simplified load
+    if (u?.id == null) return;
+    try {
+      final d = await ApiService.getDashboard();
+      if (!mounted) return;
       setState(() => _dadosCompletos = {
-            'media_avaliacao': 4.8,
-            'total_avaliacoes': 47,
-            'lotes_ativos': 3,
-            'negocios_fechados': 23
+            // sem avaliações a média vem nula: mostra 0
+            'media_avaliacao': (d['media_avaliacao'] as num?) ?? 0,
+            'total_avaliacoes': d['total_avaliacoes'] ?? 0,
+            'lotes_ativos': d['lotes_ativos'] ?? 0,
+            'negocios_fechados': d['negocios_fechados'] ?? 0,
           });
+    } catch (_) {
+      // sem os números, o perfil aparece sem o bloco de estatísticas
     }
   }
 

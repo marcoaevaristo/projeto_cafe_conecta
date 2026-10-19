@@ -3,14 +3,12 @@
 // lib/screens/checkout_screen.dart
 // ============================================================
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../services/api_service.dart';
 import '../services/app_state.dart';
-
-const String _backendUrl = 'https://cafe-conecta-backend.vercel.app';
+import '../utils/erros.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final String plano;
@@ -40,6 +38,8 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   String? _pixCode;
   String? _pixQrUrl;
   bool _pixPago = false;
+  String? _orderId;
+  bool _verificando = false;
 
   @override
   void initState() {
@@ -72,31 +72,44 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     setState(() { _carregando = true; _erro = null; });
 
     try {
-      final user = context.read<AppState>().usuario;
-      if (user == null || user.id == null) throw Exception('Usuário não autenticado');
-
-      final resp = await http.post(
-        Uri.parse('$_backendUrl/pagbank/criar-assinatura'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user_id': user.id,
-          'email':   user.email,
-          'plano':   widget.plano,
-          'metodo':  'pix',
-          'cpf':     _cpfCtrl.text.replaceAll(RegExp(r'\D'), ''),
-        }),
-      );
-
-      final data = jsonDecode(resp.body);
-      if (resp.statusCode != 200) throw Exception(data['error'] ?? 'Erro');
+      final data = await ApiService.criarAssinatura({
+        'plano':  widget.plano,
+        'metodo': 'pix',
+        'cpf':    _cpfCtrl.text.replaceAll(RegExp(r'\D'), ''),
+      });
 
       setState(() {
-        _pixCode   = data['pix_code'];
-        _pixQrUrl  = data['pix_qrcode'];
+        _orderId    = data['order_id']?.toString();
+        _pixCode    = data['pix_code'];
+        _pixQrUrl   = data['pix_qrcode'];
         _carregando = false;
       });
     } catch (e) {
-      setState(() { _erro = e.toString(); _carregando = false; });
+      setState(() { _erro = mensagemDeErro(e); _carregando = false; });
+    }
+  }
+
+  // Pergunta ao backend, que consulta o PagBank, se o PIX já caiu
+  Future<void> _verificarPix() async {
+    if (_orderId == null) return;
+    setState(() { _verificando = true; _erro = null; });
+    try {
+      final r = await ApiService.verificarPagamento(_orderId!);
+      if (!mounted) return;
+      if (r['situacao'] == 'pago') {
+        await context.read<AppState>().recarregarUsuario();
+        setState(() { _pixPago = true; _verificando = false; });
+        if (mounted) _mostrarSucesso();
+      } else {
+        setState(() {
+          _verificando = false;
+          _erro = r['situacao'] == 'recusado'
+              ? 'O pagamento foi recusado. Gere um novo código PIX.'
+              : 'Ainda não recebemos o pagamento. Se já pagou, aguarde alguns segundos e tente de novo.';
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() { _verificando = false; _erro = mensagemDeErro(e); });
     }
   }
 
@@ -114,44 +127,30 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     setState(() { _carregando = true; _erro = null; });
 
     try {
-      final user = context.read<AppState>().usuario;
-      if (user == null || user.id == null) throw Exception('Usuário não autenticado');
+      // ATENÇÃO: em produção, criptografe o cartão no navegador com o SDK do PagBank
+      // e envie só o token. Aqui segue o valor de exemplo do sandbox.
+      final data = await ApiService.criarAssinatura({
+        'nome':   _nomeCtrl.text,
+        'plano':  widget.plano,
+        'metodo': 'cartao',
+        'cpf':    _cpfCtrl.text.replaceAll(RegExp(r'\D'), ''),
+        'cartao': {
+          'encrypted':    'ENCRYPTED_CARD_TOKEN', // substituir pelo SDK
+          'nome_titular': _nomeCtrl.text,
+        },
+      });
 
-      // ATENÇÃO: Em produção, use o SDK PagBank JS para criptografar o cartão
-      // no cliente e enviar apenas o token encrypted ao backend.
-      // Nunca envie dados brutos do cartão para o seu servidor.
-      // Aqui usamos placeholder para o fluxo de sandbox.
-      final resp = await http.post(
-        Uri.parse('$_backendUrl/pagbank/criar-assinatura'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user_id':    user.id,
-          'email':      user.email,
-          'nome':       _nomeCtrl.text,
-          'plano':      widget.plano,
-          'metodo':     'cartao',
-          'cpf':        _cpfCtrl.text.replaceAll(RegExp(r'\D'), ''),
-          'cartao': {
-            'encrypted':    'ENCRYPTED_CARD_TOKEN', // substituir pelo SDK
-            'nome_titular': _nomeCtrl.text,
-          },
-        }),
-      );
-
-      final data = jsonDecode(resp.body);
-      if (resp.statusCode != 200) throw Exception(data['error'] ?? 'Erro');
-
-      final chargeStatus = data['charge_status'];
-      if (chargeStatus == 'PAID' || chargeStatus == 'AUTHORIZED') {
+      if (data['plano_liberado'] == true) {
+        if (mounted) await context.read<AppState>().recarregarUsuario();
         if (mounted) _mostrarSucesso();
       } else {
         setState(() {
-          _erro = 'Pagamento não aprovado. Status: $chargeStatus';
+          _erro = 'Pagamento não aprovado. Status: ${data['charge_status']}';
           _carregando = false;
         });
       }
     } catch (e) {
-      setState(() { _erro = e.toString(); _carregando = false; });
+      setState(() { _erro = mensagemDeErro(e); _carregando = false; });
     }
   }
 
@@ -250,6 +249,8 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                   pixCode:    _pixCode,
                   pixQrUrl:   _pixQrUrl,
                   pixPago:    _pixPago,
+                  verificando: _verificando,
+                  onVerificar: _verificarPix,
                   onPagar:    _pagarPix,
                   onCopiado:  () {
                     if (_pixCode != null) {
@@ -285,6 +286,8 @@ class _PixTab extends StatelessWidget {
   final String? pixCode;
   final String? pixQrUrl;
   final bool pixPago;
+  final bool verificando;
+  final VoidCallback onVerificar;
   final VoidCallback onPagar;
   final VoidCallback onCopiado;
 
@@ -294,6 +297,8 @@ class _PixTab extends StatelessWidget {
     required this.pixCode,
     required this.pixQrUrl,
     required this.pixPago,
+    required this.verificando,
+    required this.onVerificar,
     required this.onPagar,
     required this.onCopiado,
   });
@@ -387,8 +392,30 @@ class _PixTab extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: verificando || pixPago ? null : onVerificar,
+                icon: verificando
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.check_circle_outline),
+                label: Text(verificando ? 'Verificando…' : 'Já paguei'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3D5A2A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             const Text(
-              'Após pagar, seu acesso será liberado automaticamente.',
+              'O acesso também é liberado sozinho quando o PagBank confirmar o pagamento.',
               style: TextStyle(color: Colors.grey, fontSize: 12),
               textAlign: TextAlign.center,
             ),

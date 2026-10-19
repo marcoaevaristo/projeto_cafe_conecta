@@ -41,6 +41,14 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Busca os dados do usuário de novo (ex.: depois de pagar um plano ou editar o perfil).
+  Future<void> recarregarUsuario() async {
+    final me = await ApiService.getMe();
+    _usuario = UsuarioModel.fromMap(me);
+    _planoAtual = _planoParaPlano(_usuario!.plano);
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     await ApiService.clearToken();
     _usuario = null;
