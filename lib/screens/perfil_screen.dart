@@ -242,7 +242,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                 builder: (_) => const ConfiguracoesScreen()))),
                     _menuItem(
                         Icons.help_outline,
-                        'Ajuda',
+                        'Ajuda e contato',
                         () => Navigator.push(
                             context,
                             MaterialPageRoute(
