@@ -289,6 +289,7 @@ class _StatusChip extends StatelessWidget {
       'ativo' => (CafeColors.greenOk, 'Disponível'),
       'pausado' => (Colors.amber.shade700, 'Pausado'),
       'encerrado' => (CafeColors.redAlert, 'Encerrado'),
+      'vendido' => (CafeColors.blue, 'Vendido'),
       _ => (Colors.grey, status),
     };
     return Chip(

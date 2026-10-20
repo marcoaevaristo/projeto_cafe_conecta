@@ -21,7 +21,7 @@ class MeusAnunciosScreen extends StatefulWidget {
 class _MeusAnunciosScreenState extends State<MeusAnunciosScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabs;
-  final _status = ['ativo', 'pausado', 'encerrado'];
+  final _status = ['ativo', 'pausado', 'vendido', 'encerrado'];
   // Muda a cada ação para recarregar as três abas (um lote pausado muda de aba)
   int _versao = 0;
   void _recarregarTudo() => setState(() => _versao++);
@@ -29,7 +29,7 @@ class _MeusAnunciosScreenState extends State<MeusAnunciosScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -43,9 +43,12 @@ class _MeusAnunciosScreenState extends State<MeusAnunciosScreen>
           unselectedLabelColor: CafeColors.cream,
           indicatorColor: CafeColors.caramel,
           labelStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w600),
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           tabs: const [
             Tab(text: 'Ativos'),
             Tab(text: 'Pausados'),
+            Tab(text: 'Vendidos'),
             Tab(text: 'Encerrados'),
           ],
         ),

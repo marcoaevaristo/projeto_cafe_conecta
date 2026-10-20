@@ -1,4 +1,4 @@
-// lib/widgets/acoes_anuncio.dart — Editar, Pausar/Reativar, Encerrar e Excluir
+// lib/widgets/acoes_anuncio.dart — Editar, Pausar/Reativar, Vendido, Encerrar e Excluir
 // um anúncio do próprio usuário. Usado em "Meus anúncios" e nos detalhes do lote.
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,7 +81,7 @@ class _AcoesAnuncioState extends State<AcoesAnuncio> {
             'Anúncio pausado', ResultadoAcao.alterado);
       case 'encerrado':
         if (!await _confirmar('Encerrar anúncio?',
-            'Use quando o lote foi vendido ou não está mais disponível. Ele sai do catálogo e fica em "Encerrados".',
+            'Use quando o lote não está mais disponível (se foi vendido, prefira "Vendido"). Ele sai do catálogo e fica em "Encerrados".',
             'Encerrar')) {
           return;
         }
@@ -91,6 +91,59 @@ class _AcoesAnuncioState extends State<AcoesAnuncio> {
         return _executar(() => ApiService.atualizarStatusCafe(id, 'ativo'),
             'Anúncio reativado e de volta ao catálogo', ResultadoAcao.alterado);
     }
+  }
+
+  // Pergunta o preço final (opcional) e marca como vendido
+  Future<void> _vendido() async {
+    final ctrl = TextEditingController();
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Marcar como vendido?'),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('O lote sai do catálogo e vai para "Vendidos".'),
+          const SizedBox(height: 14),
+          TextField(
+            controller: ctrl,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText: 'Preço final por saca (opcional)',
+              prefixText: r'R$ ',
+              helperText: 'Entra na média de negócios do Índice, sem mostrar seu nome.',
+              helperMaxLines: 2,
+            ),
+          ),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: CafeColors.blue),
+            child: const Text('Marcar vendido'),
+          ),
+        ],
+      ),
+    );
+    // (o controlador não é descartado aqui: o diálogo ainda pode estar animando a saída)
+    final texto = ctrl.text.trim();
+    if (confirmou != true) return;
+    final preco = texto.isEmpty
+        ? null
+        : double.tryParse(texto.contains(',')
+            ? texto.replaceAll('.', '').replaceAll(',', '.')
+            : texto);
+    if (texto.isNotEmpty && (preco == null || preco <= 0)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Preço inválido. Use só números, por exemplo 1.450,00')));
+      }
+      return;
+    }
+    await _executar(
+        () => ApiService.atualizarStatusCafe(widget.cafe.id!, 'vendido', precoVenda: preco),
+        'Lote marcado como vendido 🎉',
+        ResultadoAcao.alterado);
   }
 
   Future<void> _excluir() async {
@@ -138,7 +191,9 @@ class _AcoesAnuncioState extends State<AcoesAnuncio> {
         else
           botao(Icons.play_circle_outline, 'Reativar', () => _status('ativo'),
               cor: CafeColors.greenOk),
-        if (status != 'encerrado')
+        if (status == 'ativo' || status == 'pausado')
+          botao(Icons.sell_outlined, 'Vendido', _vendido, cor: CafeColors.blue),
+        if (status == 'ativo' || status == 'pausado')
           botao(Icons.check_circle_outline, 'Encerrar', () => _status('encerrado')),
         botao(Icons.delete_outline, 'Excluir', _excluir, cor: CafeColors.redAlert),
       ],

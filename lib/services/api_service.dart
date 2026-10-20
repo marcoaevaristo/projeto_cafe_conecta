@@ -168,12 +168,17 @@ class ApiService {
     return _decode(res);
   }
 
-  static Future<void> atualizarStatusCafe(String cafeId, String status) async {
+  /// [precoVenda]: preço final por saca, opcional, só quando [status] é 'vendido'.
+  static Future<void> atualizarStatusCafe(String cafeId, String status,
+      {double? precoVenda}) async {
     final h = await _authHeaders();
     final res = await http.patch(
       Uri.parse('$_base/cafes/$cafeId/status'),
       headers: h,
-      body: jsonEncode({'status': status}),
+      body: jsonEncode({
+        'status': status,
+        if (precoVenda != null) 'preco_venda': precoVenda,
+      }),
     );
     _decode(res);
   }
