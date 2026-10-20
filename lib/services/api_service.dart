@@ -178,6 +178,33 @@ class ApiService {
     _decode(res);
   }
 
+  /// Edita os dados do lote (só os campos enviados mudam).
+  static Future<void> atualizarCafe(String cafeId, Map<String, dynamic> dados) async {
+    final h = await _authHeaders();
+    final res = await http.put(
+      Uri.parse('$_base/cafes/$cafeId'),
+      headers: h,
+      body: jsonEncode(dados),
+    );
+    _decode(res);
+  }
+
+  static Future<void> excluirCafe(String cafeId) async {
+    final h = await _authHeaders();
+    final res = await http.delete(Uri.parse('$_base/cafes/$cafeId'), headers: h);
+    _decode(res);
+  }
+
+  static Future<void> removerFotoCafe(String cafeId, String url) async {
+    final h = await _authHeaders();
+    final res = await http.delete(
+      Uri.parse('$_base/cafes/$cafeId/fotos'),
+      headers: h,
+      body: jsonEncode({'url': url}),
+    );
+    _decode(res);
+  }
+
   // ── Favoritos ────────────────────────────────────────────────────────
   static Future<List<CafeModel>> getFavoritos() async {
     final h = await _authHeaders();

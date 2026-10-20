@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/acoes_anuncio.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
@@ -57,9 +58,9 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.dmSans(fontSize: 13, color: CafeColors.lightRoast))
               : meuAnuncio
-                  ? Text('Este anúncio é seu.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: CafeColors.lightRoast))
+                  // Dono do anúncio: gerenciar. Depois de qualquer ação volta para a
+                  // lista, que recarrega com os dados novos.
+                  ? AcoesAnuncio(cafe: cafe, onConcluido: (_) => Navigator.pop(context, true))
                   : Row(children: [
                       Expanded(
                         child: OutlinedButton.icon(

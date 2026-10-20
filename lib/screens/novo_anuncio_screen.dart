@@ -14,8 +14,11 @@ import '../utils/theme.dart';
 import 'classificacao_ia_screen.dart';
 import 'planos_screen.dart';
 
+/// Cria um anúncio novo ou, com [cafe], edita um anúncio existente.
+/// Na edição, devolve `true` ao salvar.
 class NovoAnuncioScreen extends StatefulWidget {
-  const NovoAnuncioScreen({super.key});
+  final CafeModel? cafe;
+  const NovoAnuncioScreen({super.key, this.cafe});
   @override
   State<NovoAnuncioScreen> createState() => _NovoAnuncioScreenState();
 }
@@ -35,6 +38,47 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
   String? _erro;
   int? _score; // vem da classificação por IA
   final List<({Uint8List bytes, String tipo})> _fotos = [];
+  // Edição: fotos que o lote já tem e as que o usuário tirou
+  final List<String> _fotosExistentes = [];
+  final List<String> _fotosRemovidas = [];
+
+  bool get _editando => widget.cafe != null;
+  int get _totalFotos => _fotosExistentes.length + _fotos.length;
+
+  static const _safras = ['2026/2027', '2025/2026', '2024/2025', '2023/2024', '2022/2023'];
+
+  @override
+  void initState() {
+    super.initState();
+    final c = widget.cafe;
+    if (c == null) return;
+    _tipo = c.tipo.isEmpty ? null : c.tipo;
+    _classificacao = c.classificacao.isEmpty ? null : c.classificacao;
+    _bebida = c.bebida;
+    _peneira = c.peneira;
+    _regiao = c.regiao.isEmpty ? null : c.regiao;
+    _safra = c.safra;
+    _score = c.scoreQualidade;
+    _qtdCtrl.text = c.quantidade > 0 ? '${c.quantidade}' : '';
+    _cidadeCtrl.text = c.cidade;
+    _fazendaCtrl.text = c.fazenda ?? '';
+    if (c.precoSaca != null) {
+      final p = c.precoSaca!;
+      _precoCtrl.text = p == p.roundToDouble()
+          ? p.toStringAsFixed(0)
+          : p.toStringAsFixed(2).replaceAll('.', ',');
+    }
+    _fotosExistentes.addAll(c.fotos);
+  }
+
+  @override
+  void dispose() {
+    _qtdCtrl.dispose();
+    _cidadeCtrl.dispose();
+    _fazendaCtrl.dispose();
+    _precoCtrl.dispose();
+    super.dispose();
+  }
 
   // Fotos por lote em cada plano (tier 0=Grátis … 3=Premium); null = ilimitado
   static const _limiteFotos = [0, 3, 10, null];
@@ -45,7 +89,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
     final escolhidas = await ImagePicker()
         .pickMultiImage(maxWidth: 1600, maxHeight: 1600, imageQuality: 80);
     for (final f in escolhidas) {
-      if (limite != null && _fotos.length >= limite) break;
+      if (limite != null && _totalFotos >= limite) break;
       final nome = f.name.toLowerCase();
       _fotos.add((
         bytes: await f.readAsBytes(),
@@ -89,14 +133,37 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
         ),
       );
     }
-    final podeMais = limite == null || _fotos.length < limite;
+    final podeMais = limite == null || _totalFotos < limite;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(limite == null
-          ? '${_fotos.length} foto(s) · ilimitadas no seu plano'
-          : '${_fotos.length} de $limite fotos do seu plano',
+          ? '$_totalFotos foto(s) · ilimitadas no seu plano'
+          : '$_totalFotos de $limite fotos do seu plano',
           style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast)),
       const SizedBox(height: 8),
       Wrap(spacing: 8, runSpacing: 8, children: [
+        for (final url in List.of(_fotosExistentes))
+          Stack(children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(url, width: 88, height: 88, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      Container(width: 88, height: 88, color: CafeColors.mediumRoast)),
+            ),
+            Positioned(
+              top: 2,
+              right: 2,
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _fotosExistentes.remove(url);
+                  _fotosRemovidas.add(url);
+                }),
+                child: const CircleAvatar(
+                    radius: 11,
+                    backgroundColor: Colors.black54,
+                    child: Icon(Icons.close, size: 14, color: Colors.white)),
+              ),
+            ),
+          ]),
         for (var i = 0; i < _fotos.length; i++)
           Stack(children: [
             ClipRRect(
@@ -136,7 +203,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Novo Anúncio')),
+      appBar: AppBar(title: Text(_editando ? 'Editar Anúncio' : 'Novo Anúncio')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -162,7 +229,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
             _secao('Fotos do lote'),
             _secaoFotos(),
             _secao('Safra'),
-            _drop('Safra', ['2024/2025', '2023/2024', '2022/2023'], _safra,
+            _drop('Safra', _safras, _safra,
                 (v) => setState(() => _safra = v)),
             const SizedBox(height: 8),
             ElevatedButton.icon(
@@ -197,7 +264,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Publicar Anúncio'),
+                  : Text(_editando ? 'Salvar alterações' : 'Publicar Anúncio'),
             ),
             const SizedBox(height: 32),
           ],
@@ -222,7 +289,8 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       child: DropdownButtonFormField<String>(
         value: value,
         decoration: InputDecoration(labelText: label),
-        items: items
+        // um valor antigo que não está mais na lista continua aparecendo
+        items: [if (value != null && !items.contains(value)) value, ...items]
             .map((i) => DropdownMenuItem(value: i, child: Text(i)))
             .toList(),
         onChanged: onChanged,
@@ -256,6 +324,8 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       _erro = null;
     });
 
+    if (_editando) return _salvarEdicao();
+
     final u = context.read<AppState>().usuario!;
     final cafe = CafeModel(
       usuarioId: u.id!,
@@ -269,7 +339,7 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
       cidade: _cidadeCtrl.text.trim(),
       fazenda:
           _fazendaCtrl.text.trim().isEmpty ? null : _fazendaCtrl.text.trim(),
-      precoSaca: double.tryParse(_precoCtrl.text.replaceAll(',', '.')),
+      precoSaca: _lerPreco(_precoCtrl.text),
       scoreQualidade: _score,
     );
 
@@ -300,6 +370,67 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
                 : '✅ Anúncio publicado com sucesso!')));
       }
       Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _erro = mensagemDeErro(e);
+      });
+      mostrarErro(context, e);
+    }
+  }
+
+  // Aceita "1500", "1500,50", "1.500,50" e "1500.50"
+  static double? _lerPreco(String t) {
+    final v = t.trim();
+    if (v.isEmpty) return null;
+    return double.tryParse(
+        v.contains(',') ? v.replaceAll('.', '').replaceAll(',', '.') : v);
+  }
+
+  Future<void> _salvarEdicao() async {
+    final id = widget.cafe!.id!;
+    final fazenda = _fazendaCtrl.text.trim();
+    try {
+      await ApiService.atualizarCafe(id, {
+        'tipo': _tipo,
+        'classificacao': _classificacao,
+        'quantidade_sacas': int.tryParse(_qtdCtrl.text) ?? 0,
+        'preco_saca': _lerPreco(_precoCtrl.text),
+        'bebida': _bebida,
+        'peneira': _peneira,
+        'safra': _safra,
+        'regiao': _regiao,
+        'cidade': _cidadeCtrl.text.trim(),
+        'fazenda': fazenda.isEmpty ? null : fazenda,
+        'score': _score,
+      });
+      // Fotos: primeiro tira as removidas (libera espaço no limite), depois envia as novas
+      Object? erroFoto;
+      for (final url in _fotosRemovidas) {
+        try {
+          await ApiService.removerFotoCafe(id, url);
+        } catch (e) {
+          erroFoto = e;
+        }
+      }
+      for (final f in _fotos) {
+        try {
+          await ApiService.adicionarFotoCafe(id, f.bytes, f.tipo);
+        } catch (e) {
+          erroFoto = e;
+          break;
+        }
+      }
+      if (!mounted) return;
+      setState(() => _loading = false);
+      if (erroFoto != null) {
+        mostrarErro(context, erroFoto);
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('✅ Anúncio atualizado')));
+      }
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       setState(() {
