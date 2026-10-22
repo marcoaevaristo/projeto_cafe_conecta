@@ -1,0 +1,27 @@
+name: Prints de divulgação
+on:
+  push:
+    branches: [prints-linkedin]
+jobs:
+  prints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar Playwright
+        working-directory: .github/prints
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.47.2 >/dev/null
+          npx playwright install --with-deps chromium
+      - name: Capturar telas
+        working-directory: .github/prints
+        run: node capturar.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prints
+          path: .github/prints/prints
