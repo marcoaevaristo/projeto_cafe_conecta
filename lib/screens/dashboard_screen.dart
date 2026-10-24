@@ -106,12 +106,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
         body: _loading
             ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+            : LayoutBuilder(builder: (context, caixa) {
+                // Em tela larga: conteúdo centralizado (máx. 960 px) e 4 cartões por linha
+                final largo = caixa.maxWidth >= 720;
+                final lateral = caixa.maxWidth > 988 ? (caixa.maxWidth - 960) / 2 : 14.0;
+                return RefreshIndicator(
                 onRefresh: _carregar,
-                child: ListView(padding: const EdgeInsets.all(14), children: [
+                child: ListView(
+                    padding: EdgeInsets.symmetric(horizontal: lateral, vertical: 14),
+                    children: [
                   // KPIs
                   GridView.count(
-                      crossAxisCount: 2,
+                      crossAxisCount: largo ? 4 : 2,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisSpacing: 10,
@@ -282,7 +288,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 _mercadoPorTipo(),
                               ]))),
                   const SizedBox(height: 20),
-                ])),
+                ]));
+              }),
       ),
     );
   }
