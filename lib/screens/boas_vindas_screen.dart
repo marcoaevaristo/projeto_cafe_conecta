@@ -1,6 +1,7 @@
 // lib/screens/boas_vindas_screen.dart — primeira tela para quem não está logado
 // (ex.: quem chega pelo link do LinkedIn). Mostra o que o app faz, números reais
 // do Índice Café Conecta e deixa ver os lotes sem cadastro.
+import 'texto_legal_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -95,6 +96,19 @@ class _BoasVindasScreenState extends State<BoasVindasScreen> {
                     style: TextButton.styleFrom(foregroundColor: CafeColors.gold),
                     child: const Text('Já tenho conta · Entrar'),
                   ),
+                  const SizedBox(height: 16),
+                  Wrap(alignment: WrapAlignment.center, children: [
+                    TextButton(
+                      onPressed: () => _abrir(const TextoLegalScreen.termos()),
+                      style: TextButton.styleFrom(foregroundColor: CafeColors.cream.withValues(alpha: 0.7)),
+                      child: const Text('Termos de uso', style: TextStyle(fontSize: 12)),
+                    ),
+                    TextButton(
+                      onPressed: () => _abrir(const TextoLegalScreen.privacidade()),
+                      style: TextButton.styleFrom(foregroundColor: CafeColors.cream.withValues(alpha: 0.7)),
+                      child: const Text('Política de privacidade', style: TextStyle(fontSize: 12)),
+                    ),
+                  ]),
                 ]),
               ),
             ),

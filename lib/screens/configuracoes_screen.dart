@@ -1,5 +1,6 @@
 // lib/screens/configuracoes_screen.dart
 // Dados da conta, senha, assinatura e exclusão de conta.
+import 'texto_legal_screen.dart';
 import 'boas_vindas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -74,6 +75,26 @@ class ConfiguracoesScreen extends StatelessWidget {
               child: Text(estado.planoTier == 0 ? 'Assinar' : 'Renovar ou mudar'),
             ),
           ),
+        ),
+        _titulo('Legal'),
+        Card(
+          child: Column(children: [
+            ListTile(
+              leading: const Icon(Icons.description_outlined, color: CafeColors.caramel),
+              title: const Text('Termos de uso'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const TextoLegalScreen.termos())),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined, color: CafeColors.caramel),
+              title: const Text('Política de privacidade'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const TextoLegalScreen.privacidade())),
+            ),
+          ]),
         ),
         _titulo('Zona de perigo'),
         Card(

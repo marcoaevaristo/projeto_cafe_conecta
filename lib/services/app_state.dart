@@ -80,6 +80,9 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Mensagem do servidor quando o cadastro falha (e-mail já usado, limite, etc.)
+  String? ultimoErroCadastro;
+
   Future<bool> cadastrar({
     required String nome,
     required String email,
@@ -88,7 +91,9 @@ class AppState extends ChangeNotifier {
     String? empresa,
     String? telefone,
     String? regiao,
+    String? versaoTermos,
   }) async {
+    ultimoErroCadastro = null;
     try {
       await ApiService.cadastrar({
         'nome': nome,
@@ -98,13 +103,16 @@ class AppState extends ChangeNotifier {
         'empresa': empresa,
         'telefone': telefone,
         'regiao': regiao,
+        if (versaoTermos != null) 'aceite_termos': true,
+        if (versaoTermos != null) 'versao_termos': versaoTermos,
       });
       final me = await ApiService.getMe();
       _usuario = UsuarioModel.fromMap(me);
       _planoAtual = _planoParaPlano(_usuario!.plano);
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (e) {
+      if (e is ApiException) ultimoErroCadastro = e.message;
       return false;
     }
   }

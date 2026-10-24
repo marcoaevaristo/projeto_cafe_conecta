@@ -1,4 +1,5 @@
 // lib/screens/ajuda_screen.dart — perguntas frequentes
+import 'texto_legal_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -73,6 +74,26 @@ class AjudaScreen extends StatelessWidget {
               ],
             ),
           ),
+        const SizedBox(height: 12),
+        Card(
+          child: Column(children: [
+            ListTile(
+              leading: const Icon(Icons.description_outlined, color: CafeColors.caramel),
+              title: const Text('Termos de uso'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const TextoLegalScreen.termos())),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined, color: CafeColors.caramel),
+              title: const Text('Política de privacidade'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const TextoLegalScreen.privacidade())),
+            ),
+          ]),
+        ),
       ]),
     );
   }

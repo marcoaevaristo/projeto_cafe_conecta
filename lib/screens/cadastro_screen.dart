@@ -1,5 +1,7 @@
 // lib/screens/cadastro_screen.dart
 
+import '../utils/textos_legais.dart';
+import 'texto_legal_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
   String _tipo = 'comprador';
   String? _regiao;
   bool _loading = false;
+  bool _aceitouTermos = false;
   String? _erro;
 
   @override
@@ -85,7 +88,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   .toList(),
               onChanged: (v) => setState(() => _regiao = v),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            _aceite(),
+            const SizedBox(height: 12),
             if (_erro != null)
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -115,6 +120,38 @@ class _CadastroScreenState extends State<CadastroScreen> {
         ),
       ),
     );
+  }
+
+  // Aceite obrigatório dos Termos e da Política (LGPD)
+  Widget _aceite() {
+    final link = GoogleFonts.dmSans(
+        fontSize: 13, color: CafeColors.caramel, fontWeight: FontWeight.w700,
+        decoration: TextDecoration.underline);
+    void abrir(Widget tela) =>
+        Navigator.push(context, MaterialPageRoute(builder: (_) => tela));
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Checkbox(
+        value: _aceitouTermos,
+        activeColor: CafeColors.caramel,
+        onChanged: (v) => setState(() => _aceitouTermos = v ?? false),
+      ),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Wrap(children: [
+            Text('Li e aceito os ', style: GoogleFonts.dmSans(fontSize: 13)),
+            GestureDetector(
+                onTap: () => abrir(const TextoLegalScreen.termos()),
+                child: Text('Termos de uso', style: link)),
+            Text(' e a ', style: GoogleFonts.dmSans(fontSize: 13)),
+            GestureDetector(
+                onTap: () => abrir(const TextoLegalScreen.privacidade()),
+                child: Text('Política de privacidade', style: link)),
+            Text('.', style: GoogleFonts.dmSans(fontSize: 13)),
+          ]),
+        ),
+      ),
+    ]);
   }
 
   Widget _secao(String titulo) => Padding(
@@ -157,6 +194,10 @@ class _CadastroScreenState extends State<CadastroScreen> {
           () => _erro = 'Preencha nome, e-mail e senha (mín. 6 caracteres).');
       return;
     }
+    if (!_aceitouTermos) {
+      setState(() => _erro = 'Para criar a conta, aceite os Termos de uso e a Política de privacidade.');
+      return;
+    }
     setState(() {
       _loading = true;
       _erro = null;
@@ -171,6 +212,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
               : _empresaCtrl.text.trim(),
           telefone: _telCtrl.text.trim().isEmpty ? null : _telCtrl.text.trim(),
           regiao: _regiao,
+          versaoTermos: versaoTermos,
         );
     if (!mounted) return;
     setState(() => _loading = false);
@@ -178,7 +220,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
       Navigator.pushAndRemoveUntil(context,
           MaterialPageRoute(builder: (_) => const MainScreen()), (_) => false);
     } else {
-      setState(() => _erro = 'E-mail já cadastrado ou erro interno.');
+      setState(() => _erro = context.read<AppState>().ultimoErroCadastro ??
+          'Não foi possível criar a conta. Tente novamente.');
     }
   }
 }
