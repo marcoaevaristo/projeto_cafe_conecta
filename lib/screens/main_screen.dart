@@ -2,6 +2,7 @@
 // Celular: barra inferior com 5 itens (Início, Catálogo, Propostas, Mensagens, Menu)
 //          e menu lateral com o restante.
 // Tela larga (computador/tablet): menu lateral fixo com tudo, sem barra inferior.
+import 'custo_margem_screen.dart';
 import 'boas_vindas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -280,6 +281,7 @@ class _MenuNavegacao extends StatelessWidget {
 
         secao('Meu negócio'),
         item(Icons.inventory_2_outlined, 'Meus anúncios', abre: const MeusAnunciosScreen()),
+        item(Icons.calculate_outlined, 'Custo e margem', abre: const CustoMargemScreen()),
         item(Icons.smart_toy_outlined, 'Classificação por IA', abre: const ClassificacaoIAScreen()),
         if (u?.id != null)
           item(Icons.star_outline, 'Minhas avaliações',

@@ -444,6 +444,20 @@ class ApiService {
     _decode(res);
   }
 
+  /// Custo de produção por saca do usuário (null = não informado)
+  static Future<double?> getCusto() async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base/auth/custo'), headers: h);
+    return (_decode(res)['custo_saca'] as num?)?.toDouble();
+  }
+
+  static Future<void> setCusto(double? custo) async {
+    final h = await _authHeaders();
+    final res = await http.put(Uri.parse('$_base/auth/custo'),
+        headers: h, body: jsonEncode({'custo_saca': custo}));
+    _decode(res);
+  }
+
   /// Avisos por e-mail ligados? (padrão: sim)
   static Future<bool> getAvisosEmail() async {
     final h = await _authHeaders();
