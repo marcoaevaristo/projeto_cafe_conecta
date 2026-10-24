@@ -124,7 +124,7 @@ class _EmpresaScreenState extends State<EmpresaScreen> {
                         child: ListTile(
                           leading: const Icon(Icons.business_outlined, color: CafeColors.caramel),
                           title: Text('${e['nome']}', style: GoogleFonts.dmSans(fontWeight: FontWeight.w700)),
-                          subtitle: Text('${_tipos[e['tipo']] ?? e['tipo']} · ${e['papel'] == 'admin' ? 'administrador' : 'membro'}'),
+                          subtitle: Text('${_tipos[e['tipo']] ?? e['tipo']} · ${e['acesso_master'] == true ? 'acesso master' : e['papel'] == 'admin' ? 'administrador' : 'membro'}'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () async {
                             await Navigator.push(context, MaterialPageRoute(builder: (_) => _EmpresaDetalhe(empresa: e)));
@@ -306,7 +306,7 @@ class _EmpresaDetalheState extends State<_EmpresaDetalhe> {
                     ),
             ),
           ),
-        if (eu != null && eu != e['dono_id']) ...[
+        if (eu != null && eu != e['dono_id'] && e['acesso_master'] != true) ...[
           const SizedBox(height: 16),
           TextButton.icon(
             onPressed: () => _remover(eu, euMesmo: true),
