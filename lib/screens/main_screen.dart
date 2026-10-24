@@ -4,6 +4,10 @@
 // Tela larga (computador/tablet): menu lateral fixo com tudo, sem barra inferior.
 import 'pedidos_compra_screen.dart';
 import 'amostras_screen.dart';
+import 'safra_screen.dart';
+import 'relatorios_screen.dart';
+import 'credito_screen.dart';
+import 'empresa_screen.dart';
 import 'custo_margem_screen.dart';
 import 'boas_vindas_screen.dart';
 import 'package:flutter/material.dart';
@@ -275,6 +279,7 @@ class _MenuNavegacao extends StatelessWidget {
         item(Icons.show_chart_outlined, 'Cotações', tela: _cotacoes),
         item(Icons.shopping_basket_outlined, 'Pedidos de compra', abre: const PedidosCompraScreen()),
         item(Icons.inventory_outlined, 'Amostras', abre: const AmostrasScreen()),
+        item(Icons.agriculture_outlined, 'Previsão de safra', abre: const SafraScreen()),
         item(Icons.notifications_outlined, 'Alertas de preço', tela: _alertas),
         item(Icons.query_stats_outlined, 'Histórico de preços',
             abre: const UpgradeGate(
@@ -286,6 +291,9 @@ class _MenuNavegacao extends StatelessWidget {
         secao('Meu negócio'),
         item(Icons.inventory_2_outlined, 'Meus anúncios', abre: const MeusAnunciosScreen()),
         item(Icons.calculate_outlined, 'Custo e margem', abre: const CustoMargemScreen()),
+        item(Icons.summarize_outlined, 'Relatórios (PDF e Excel)', abre: const RelatoriosScreen()),
+        item(Icons.account_balance_outlined, 'Crédito e CPR', abre: const CreditoScreen()),
+        item(Icons.business_outlined, 'Conta empresarial', abre: const EmpresaScreen()),
         item(Icons.smart_toy_outlined, 'Classificação por IA', abre: const ClassificacaoIAScreen()),
         if (u?.id != null)
           item(Icons.star_outline, 'Minhas avaliações',

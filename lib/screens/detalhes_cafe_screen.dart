@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_screen.dart';
 import '../widgets/acoes_anuncio.dart';
+import '../widgets/frete_estimado.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
@@ -249,6 +250,10 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                     _linha('Cidade', cafe.cidade),
                     _linha('Fazenda', cafe.fazenda ?? '—'),
                   ]),
+                  if (!meuAnuncio) ...[
+                    _secao('Frete estimado'),
+                    FreteEstimado(cafe: cafe),
+                  ],
                   _secao('Corretor Responsável'),
                   _Card(children: [
                     _linha('Nome', cafe.corretorNome ?? '—'),

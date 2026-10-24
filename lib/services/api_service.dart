@@ -487,6 +487,70 @@ class ApiService {
   static Future<Map<String, dynamic>> atualizarAmostra(String id, Map<String, dynamic> dados) =>
       _enviar('PATCH', '/amostras/$id', dados);
 
+  static Future<void> _apagar(String caminho) async {
+    final h = await _authHeaders();
+    _decode(await http.delete(Uri.parse('$_base$caminho'), headers: h));
+  }
+
+  static Future<Map<String, dynamic>> _objeto(String caminho) async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base$caminho'), headers: h);
+    return _decode(res);
+  }
+
+  // ── Previsão de safra ────────────────────────────────────────────────
+  static Future<List<Map<String, dynamic>>> getMinhasPrevisoes() => _lista('/safra/minhas');
+  static Future<List<Map<String, dynamic>>> getOfertaFutura() => _lista('/safra/agregado');
+  static Future<Map<String, dynamic>> criarPrevisao(Map<String, dynamic> dados) => _enviar('POST', '/safra', dados);
+  static Future<void> apagarPrevisao(String id) => _apagar('/safra/$id');
+
+  // ── Crédito / CPR ────────────────────────────────────────────────────
+  static Future<List<Map<String, dynamic>>> getMeusCreditos() => _lista('/credito/meus');
+  static Future<List<Map<String, dynamic>>> getTodosCreditos() => _lista('/credito/todos');
+  static Future<Map<String, dynamic>> registrarCredito(Map<String, dynamic> dados) => _enviar('POST', '/credito', dados);
+  static Future<void> retirarCredito(String id) => _apagar('/credito/$id');
+
+  // ── Relatórios e conta empresarial ───────────────────────────────────
+  static Future<Map<String, dynamic>> getRelatorio(String de, String ate) => _objeto('/relatorios/meu?de=$de&ate=$ate');
+  static Future<List<Map<String, dynamic>>> getMinhasEmpresas() => _lista('/empresas/minhas');
+  static Future<Map<String, dynamic>> criarEmpresa(Map<String, dynamic> dados) => _enviar('POST', '/empresas', dados);
+  static Future<Map<String, dynamic>> entrarEmpresa(String codigo) => _enviar('POST', '/empresas/entrar', {'codigo': codigo});
+  static Future<List<Map<String, dynamic>>> getMembrosEmpresa(String id) => _lista('/empresas/$id/membros');
+  static Future<Map<String, dynamic>> getPainelEmpresa(String id, String de, String ate) =>
+      _objeto('/empresas/$id/painel?de=$de&ate=$ate');
+  static Future<void> removerMembro(String empresaId, String usuarioId) => _apagar('/empresas/$empresaId/membros/$usuarioId');
+  static Future<Map<String, dynamic>> mudarPapel(String empresaId, String usuarioId, String papel) =>
+      _enviar('PATCH', '/empresas/$empresaId/membros/$usuarioId', {'papel': papel});
+
+  // ── Notificações push ────────────────────────────────────────────────
+  static Future<String?> getChavePush() async {
+    final res = await http.get(Uri.parse('$_base/push/chave'));
+    if (res.statusCode != 200) return null;
+    return (jsonDecode(res.body) as Map)['chave'] as String?;
+  }
+  static Future<Map<String, dynamic>> inscreverPush(Map<String, dynamic> inscricao) => _enviar('POST', '/push/inscrever', inscricao);
+  static Future<Map<String, dynamic>> cancelarPush(String endpoint) => _enviar('POST', '/push/cancelar', {'endpoint': endpoint});
+  static Future<Map<String, dynamic>> testarPush() => _enviar('POST', '/push/teste', {});
+
+  // ── Entrar com Google ────────────────────────────────────────────────
+  static Future<String?> getGoogleClientId() async {
+    try {
+      final res = await http.get(Uri.parse('$_base/auth/google/config'));
+      if (res.statusCode != 200) return null;
+      return (jsonDecode(res.body) as Map)['client_id'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Devolve a resposta crua: 200/201 com token, ou 428 quando falta completar o cadastro.
+  static Future<(int, Map<String, dynamic>)> entrarComGoogle(Map<String, dynamic> corpo) async {
+    final res = await http.post(Uri.parse('$_base/auth/google'),
+        headers: {'Content-Type': 'application/json'}, body: jsonEncode(corpo));
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    return (res.statusCode, data);
+  }
+
   /// Custo de produção por saca do usuário (null = não informado)
   static Future<double?> getCusto() async {
     final h = await _authHeaders();

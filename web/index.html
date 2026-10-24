@@ -46,6 +46,95 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    // Notificações push: chamado pelo app (lib/services/push_service_web.dart).
+    window.cafePush = {
+      suportado: function () {
+        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+      },
+      permissao: function () { return window.Notification ? Notification.permission : 'denied'; },
+      _registro: function () {
+        return navigator.serviceWorker.register('push-sw.js', { scope: 'push/' });
+      },
+      _chave: function (base64) {
+        var p = '='.repeat((4 - base64.length % 4) % 4);
+        var b = atob((base64 + p).replace(/-/g, '+').replace(/_/g, '/'));
+        var arr = new Uint8Array(b.length);
+        for (var i = 0; i < b.length; i++) arr[i] = b.charCodeAt(i);
+        return arr;
+      },
+      // Devolve a inscrição em JSON (string) ou lança erro com a explicação
+      ativar: async function (chavePublica) {
+        var perm = await Notification.requestPermission();
+        if (perm !== 'granted') throw new Error('Permissão de notificação negada no navegador');
+        var reg = await window.cafePush._registro();
+        await navigator.serviceWorker.ready;
+        var sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: window.cafePush._chave(chavePublica) });
+        }
+        return JSON.stringify(sub);
+      },
+      // Endpoint atual (ou '' se não inscrito)
+      atual: async function () {
+        if (!window.cafePush.suportado()) return '';
+        var reg = await navigator.serviceWorker.getRegistration('push/');
+        var sub = reg && await reg.pushManager.getSubscription();
+        return sub ? sub.endpoint : '';
+      },
+      desativar: async function () {
+        var reg = await navigator.serviceWorker.getRegistration('push/');
+        var sub = reg && await reg.pushManager.getSubscription();
+        if (!sub) return '';
+        var endpoint = sub.endpoint;
+        await sub.unsubscribe();
+        return endpoint;
+      }
+    };
+  </script>
+  <script>
+    // Entrar com Google (Google Identity Services). Chamado por lib/widgets/google/botao_google_web.dart
+    window.cafeGoogle = {
+      _carregando: null,
+      _carregar: function () {
+        if (window.google && window.google.accounts) return Promise.resolve();
+        if (!window.cafeGoogle._carregando) {
+          window.cafeGoogle._carregando = new Promise(function (ok, erro) {
+            var s = document.createElement('script');
+            s.src = 'https://accounts.google.com/gsi/client';
+            s.async = true; s.onload = ok; s.onerror = erro;
+            document.head.appendChild(s);
+          });
+        }
+        return window.cafeGoogle._carregando;
+      },
+      botao: async function (elemento, clientId, largura, aoEntrar) {
+        await window.cafeGoogle._carregar();
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: function (r) { aoEntrar(r.credential); },
+          ux_mode: 'popup',
+          auto_select: false,
+        });
+        google.accounts.id.renderButton(elemento, {
+          theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular',
+          locale: 'pt-BR', width: largura,
+        });
+      }
+    };
+  </script>
+  <script>
+    // Localização do aparelho para o frete estimado: devolve "lat,lng" ou lança erro.
+    window.cafeLocal = function () {
+      return new Promise(function (ok, erro) {
+        if (!navigator.geolocation) return erro(new Error('sem geolocalizacao'));
+        navigator.geolocation.getCurrentPosition(
+          function (p) { ok(p.coords.latitude + ',' + p.coords.longitude); },
+          function (e) { erro(new Error(e && e.code === 1 ? 'negada' : 'indisponivel')); },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+      });
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

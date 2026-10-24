@@ -50,6 +50,17 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Entra com um token já emitido pelo servidor (ex.: login com Google).
+  Future<void> entrarComToken(String token) async {
+    await ApiService.saveToken(token);
+    ApiService.registrarVisita();
+    final me = await ApiService.getMe();
+    _usuario = UsuarioModel.fromMap(me);
+    _planoAtual = _planoParaPlano(_usuario!.plano);
+    await refresh();
+    notifyListeners();
+  }
+
   /// Busca os dados do usuário de novo (ex.: depois de pagar um plano ou editar o perfil).
   Future<void> recarregarUsuario() async {
     final me = await ApiService.getMe();

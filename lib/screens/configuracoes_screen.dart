@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
+import '../services/push_service.dart';
 import '../services/app_state.dart';
 import '../utils/erros.dart';
 import '../utils/theme.dart';
@@ -51,6 +52,7 @@ class ConfiguracoesScreen extends StatelessWidget {
         ),
         _titulo('Avisos'),
         const Card(child: _AvisosEmail()),
+        const Card(child: _AvisosPush()),
         _titulo('Segurança'),
         Card(
           child: ListTile(
@@ -165,6 +167,57 @@ class _AvisosEmailState extends State<_AvisosEmail> {
         value: _ligado ?? true,
         activeColor: CafeColors.caramel,
         onChanged: _ligado == null || _salvando ? null : _alterar,
+      );
+}
+
+class _AvisosPush extends StatefulWidget {
+  const _AvisosPush();
+  @override
+  State<_AvisosPush> createState() => _AvisosPushState();
+}
+
+class _AvisosPushState extends State<_AvisosPush> {
+  bool? _ligado;
+  bool _salvando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ler();
+  }
+
+  Future<void> _ler() async {
+    final v = await PushService.ativo();
+    if (mounted) setState(() => _ligado = v);
+  }
+
+  Future<void> _alterar(bool v) async {
+    setState(() => _salvando = true);
+    try {
+      if (v) {
+        await PushService.ativar();
+        await ApiService.testarPush();
+      } else {
+        await PushService.desativar();
+      }
+      if (mounted) setState(() => _ligado = v);
+    } catch (e) {
+      if (mounted) mostrarErro(context, e);
+    } finally {
+      if (mounted) setState(() => _salvando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => SwitchListTile(
+        secondary: const Icon(Icons.notifications_active_outlined, color: CafeColors.caramel),
+        title: const Text('Notificações neste aparelho'),
+        subtitle: Text(PushService.suportado
+            ? 'Aviso na tela na hora da proposta, mensagem ou alerta'
+            : 'Indisponível neste navegador (no iPhone, instale o app na Tela de Início)'),
+        value: _ligado ?? false,
+        activeColor: CafeColors.caramel,
+        onChanged: _ligado == null || _salvando || !PushService.suportado ? null : _alterar,
       );
 }
 
