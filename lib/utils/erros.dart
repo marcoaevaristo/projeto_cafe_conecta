@@ -7,6 +7,7 @@ import '../screens/planos_screen.dart';
 
 String mensagemDeErro(Object e) {
   if (e is ApiException) return e.message;
+  if (e is String) return e; // mensagens de validação da própria tela
   return 'Não foi possível concluir. Verifique sua conexão e tente novamente.';
 }
 

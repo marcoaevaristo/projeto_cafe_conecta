@@ -2,6 +2,7 @@
 // Celular: barra inferior com 5 itens (Início, Catálogo, Propostas, Mensagens, Menu)
 //          e menu lateral com o restante.
 // Tela larga (computador/tablet): menu lateral fixo com tudo, sem barra inferior.
+import 'pedidos_compra_screen.dart';
 import 'custo_margem_screen.dart';
 import 'boas_vindas_screen.dart';
 import 'package:flutter/material.dart';
@@ -271,6 +272,7 @@ class _MenuNavegacao extends StatelessWidget {
         secao('Mercado'),
         item(Icons.map_outlined, 'Mapa de disponibilidade', tela: _mapa),
         item(Icons.show_chart_outlined, 'Cotações', tela: _cotacoes),
+        item(Icons.shopping_basket_outlined, 'Pedidos de compra', abre: const PedidosCompraScreen()),
         item(Icons.notifications_outlined, 'Alertas de preço', tela: _alertas),
         item(Icons.query_stats_outlined, 'Histórico de preços',
             abre: const UpgradeGate(

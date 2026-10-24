@@ -444,6 +444,41 @@ class ApiService {
     _decode(res);
   }
 
+  // ── Pedidos de compra ────────────────────────────────────────────────
+  static Future<List<Map<String, dynamic>>> _lista(String caminho) async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base$caminho'), headers: h);
+    final data = jsonDecode(res.body);
+    if (res.statusCode >= 400) {
+      throw ApiException(res.statusCode, (data as Map)['error'] ?? 'Erro');
+    }
+    return (data as List).cast<Map<String, dynamic>>();
+  }
+
+  static Future<Map<String, dynamic>> _enviar(String metodo, String caminho, Map<String, dynamic> corpo) async {
+    final h = await _authHeaders();
+    final uri = Uri.parse('$_base$caminho');
+    final body = jsonEncode(corpo);
+    final res = metodo == 'POST'
+        ? await http.post(uri, headers: h, body: body)
+        : metodo == 'PUT'
+            ? await http.put(uri, headers: h, body: body)
+            : await http.patch(uri, headers: h, body: body);
+    return _decode(res);
+  }
+
+  static Future<List<Map<String, dynamic>>> getPedidos() => _lista('/pedidos');
+  static Future<List<Map<String, dynamic>>> getMeusPedidos() => _lista('/pedidos/meus');
+  static Future<List<Map<String, dynamic>>> getMinhasOfertas() => _lista('/pedidos/minhas-ofertas');
+  static Future<Map<String, dynamic>> criarPedido(Map<String, dynamic> dados) =>
+      _enviar('POST', '/pedidos', dados);
+  static Future<Map<String, dynamic>> atualizarPedido(String id, String status) =>
+      _enviar('PATCH', '/pedidos/$id', {'status': status});
+  static Future<Map<String, dynamic>> ofertarPedido(String id, Map<String, dynamic> dados) =>
+      _enviar('POST', '/pedidos/$id/ofertas', dados);
+  static Future<Map<String, dynamic>> responderOferta(String ofertaId, String status) =>
+      _enviar('PATCH', '/pedidos/ofertas/$ofertaId', {'status': status});
+
   /// Custo de produção por saca do usuário (null = não informado)
   static Future<double?> getCusto() async {
     final h = await _authHeaders();
