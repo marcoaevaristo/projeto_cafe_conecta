@@ -1,11 +1,10 @@
 // lib/screens/cotacoes_screen.dart
 // Índice Café Conecta (preços reais dos lotes do app), café na bolsa e dólar ao
-// vivo pelos widgets gratuitos do TradingView, dólar PTAX oficial do Banco
-// Central e atalhos para as fontes oficiais.
+// vivo pelos widgets gratuitos do TradingView (o crédito "TradingView" é exigido
+// pelos termos de uso deles e fica discreto no rodapé de cada quadro) e dólar PTAX.
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../services/cotacoes_service.dart';
 import '../utils/theme.dart';
 import '../widgets/conversor_bolsa.dart';
@@ -35,31 +34,6 @@ Map<String, dynamic> _overview(List<List<String>> simbolos) => {
       'lineWidth': 2,
       'dateRanges': ['1d|1', '1m|30', '3m|60', '12m|1D', '60m|1W'],
     };
-
-class _Fonte {
-  final String titulo, descricao, site, url;
-  final IconData icone;
-  const _Fonte(this.titulo, this.descricao, this.site, this.url, this.icone);
-}
-
-const _bolsa = [
-  _Fonte('Café Arábica — Contrato C (Nova York)',
-      'Bolsa ICE, em centavos de dólar por libra-peso. Referência mundial do arábica.',
-      'br.investing.com', 'https://br.investing.com/commodities/us-coffee-c', Icons.trending_up),
-  _Fonte('Café Robusta (Londres)',
-      'Bolsa ICE Europa, em dólares por tonelada. Referência do conilon/robusta.',
-      'br.investing.com', 'https://br.investing.com/commodities/london-coffee', Icons.trending_up),
-];
-
-const _mercadoFisico = [
-  _Fonte('Indicador CEPEA/ESALQ',
-      'Preço da saca de 60 kg no mercado físico brasileiro, arábica e robusta.',
-      'cepea.org.br', 'https://www.cepea.org.br/br/indicador/cafe.aspx', Icons.agriculture_outlined),
-  _Fonte('Notícias Agrícolas — cotações do café',
-      'Preços por praça (Sul de Minas, Cerrado, Mogiana…) e bolsas, atualizados ao longo do dia.',
-      'noticiasagricolas.com.br', 'https://www.noticiasagricolas.com.br/cotacoes/cafe',
-      Icons.place_outlined),
-];
 
 class CotacoesScreen extends StatefulWidget {
   const CotacoesScreen({super.key});
@@ -122,13 +96,6 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
     }
   }
 
-  Future<void> _abrir(String url) async {
-    final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Não foi possível abrir $url')));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,10 +123,8 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
               ),
             ),
           ),
-          _nota('Arábica B3: contrato futuro em US\$ por saca de 60 kg, com atraso de cerca de 15 min. '
-              'Arábica NY (ref.): contrato à vista da corretora Pepperstone, que acompanha o Contrato C '
-              'de Nova York, em centavos de dólar por libra-peso. O contrato oficial da bolsa ICE, o '
-              'robusta de Londres e os preços por região abrem nos links abaixo.'),
+          _nota('Arábica B3 em US\$ por saca de 60 kg (atraso de cerca de 15 min). '
+              'Arábica NY em centavos de dólar por libra-peso.'),
           const SizedBox(height: 10),
           ConversorBolsa(dolarPtax: _dolar?.cotacaoVenda, mediaArabicaApp: _mediaArabica),
           _titulo('Dólar'),
@@ -178,16 +143,12 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
               ),
             ),
           ),
-          _nota('O PTAX é a taxa oficial do Banco Central, usada em contratos. O gráfico mostra o '
-              'dólar comercial negociado agora, em tempo real.'),
-          _titulo('Fontes oficiais'),
-          for (final f in _bolsa) _cardFonte(f),
-          for (final f in _mercadoFisico) _cardFonte(f),
-          const SizedBox(height: 12),
+          _nota('O PTAX é a taxa oficial usada em contratos; o gráfico mostra o dólar negociado agora.'),
+          const SizedBox(height: 16),
           Text(
-            'O Índice Café Conecta usa só os lotes anunciados e os negócios fechados aqui no app. '
-            'Os outros preços vêm das fontes indicadas em cada quadro.',
-            style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast, height: 1.4),
+            'O Índice Café Conecta é calculado com os lotes e negócios do próprio app.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.dmSans(fontSize: 11, color: CafeColors.lightRoast, height: 1.4),
           ),
           const SizedBox(height: 24),
         ]),
@@ -359,7 +320,7 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
                   ]),
                   const SizedBox(height: 8),
                   Text(
-                      '${_dolar!.fonte} · ${_dataHora.format(_dolar!.dataReferencia.toLocal())}',
+                      'Atualizado em ${_dataHora.format(_dolar!.dataReferencia.toLocal())}',
                       style: GoogleFonts.dmSans(
                           color: CafeColors.cream.withValues(alpha: 0.7), fontSize: 11)),
                 ]),
@@ -380,37 +341,4 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
         ],
       );
 
-  Widget _cardFonte(_Fonte f) => Card(
-        margin: const EdgeInsets.only(bottom: 10),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => _abrir(f.url),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(children: [
-              CircleAvatar(
-                backgroundColor: CafeColors.caramel.withValues(alpha: 0.15),
-                child: Icon(f.icone, color: CafeColors.caramel),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(f.titulo,
-                      style: GoogleFonts.dmSans(
-                          fontWeight: FontWeight.w700, fontSize: 14, color: CafeColors.darkRoast)),
-                  const SizedBox(height: 3),
-                  Text(f.descricao,
-                      style: GoogleFonts.dmSans(
-                          fontSize: 12, color: CafeColors.lightRoast, height: 1.35)),
-                  const SizedBox(height: 4),
-                  Text(f.site,
-                      style: GoogleFonts.dmSans(
-                          fontSize: 11, color: CafeColors.caramel, fontWeight: FontWeight.w600)),
-                ]),
-              ),
-              const Icon(Icons.open_in_new, size: 18, color: CafeColors.lightRoast),
-            ]),
-          ),
-        ),
-      );
 }
