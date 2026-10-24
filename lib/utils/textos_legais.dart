@@ -1,7 +1,7 @@
 // lib/utils/textos_legais.dart — Termos de uso e Política de privacidade.
 // Ao mudar o conteúdo, atualize [versaoTermos] (o cadastro registra a versão aceita).
 
-const versaoTermos = '2026-10-24';
+const versaoTermos = '2026-10-24.2';
 const dataTermos = '24 de outubro de 2026';
 const responsavelApp = 'Marco Antônio Evaristo';
 const contatoPrivacidade = 'cafeconecta5@gmail.com';
@@ -55,7 +55,10 @@ const List<SecaoLegal> politicaDePrivacidade = [
   ]),
   (titulo: '2. Quais dados coletamos', paragrafos: [
     'Dados de cadastro: nome, e-mail, telefone, cidade, estado, tipo de conta (produtor, comprador ou corretor) e senha (guardada apenas de forma criptografada).',
-    'Dados de uso do app: anúncios e fotos dos lotes, propostas, mensagens, avaliações, favoritos e alertas de preço.',
+    'Se você entrar com o Google, recebemos do Google apenas seu nome, e-mail e um identificador da conta. Não temos acesso à sua senha do Google nem a outros dados da conta.',
+    'Dados de uso do app: anúncios e fotos dos lotes, propostas, mensagens, avaliações, favoritos, alertas de preço, pedidos de compra, pedidos de amostra (com o endereço de entrega informado), previsões de safra, custo de produção e pedidos de crédito.',
+    'Notificações: se você ligar as notificações em Configurações, guardamos o endereço técnico de entrega fornecido pelo seu navegador. Desligar remove esse registro.',
+    'Localização: só é usada quando você toca em calcular o frete, para medir a distância até o lote. O cálculo é feito no aparelho e a localização não é enviada nem guardada por nós.',
     'Dados de pagamento: plano contratado, valor, data e situação do pagamento. Os dados do cartão ficam com o PagBank.',
     'Dados técnicos e de segurança: data dos acessos, visualizações de anúncios e tentativas de login. O endereço IP é guardado apenas em forma embaralhada (hash), usada para contar visitas e bloquear tentativas abusivas.',
   ]),
@@ -63,14 +66,18 @@ const List<SecaoLegal> politicaDePrivacidade = [
     'Para criar e manter sua conta e permitir anunciar, negociar e conversar com outros usuários (execução do contrato).',
     'Para mostrar seus anúncios no catálogo. Seu nome, cidade e os dados do lote ficam visíveis para quem acessa o app; o telefone aparece só para usuários logados.',
     'Quando uma proposta é aceita, nome, cidade, telefone e e-mail das duas partes aparecem no contrato do negócio, disponível apenas para elas.',
-    'Para enviar avisos por e-mail sobre propostas, mensagens e alertas de preço. Você pode desligar esses avisos em Configurações.',
+    'Para enviar avisos por e-mail e notificações sobre propostas, mensagens, amostras, pedidos e alertas de preço. Você pode desligar cada um em Configurações.',
+    'O endereço de um pedido de amostra aparece só para o vendedor daquele lote. O resultado da prova aparece na página do lote, sem o nome de quem provou.',
+    'Previsões de safra são mostradas somadas por região e mês; grupos com um só produtor não aparecem. O custo de produção só é visto por você.',
     'Para processar pagamentos de planos, prevenir fraudes, proteger as contas e cumprir obrigações legais.',
     'Para calcular estatísticas e o Índice Café Conecta, sempre de forma agregada, sem identificar quem negociou.',
   ]),
   (titulo: '4. Com quem compartilhamos', paragrafos: [
-    'Usamos prestadores de serviço que tratam dados em nosso nome: Supabase (banco de dados e armazenamento de fotos), Vercel (hospedagem), PagBank (pagamentos), Google (envio dos e-mails) e Anthropic (análise da foto na classificação por IA, apenas quando você usa esse recurso).',
+    'Usamos prestadores de serviço que tratam dados em nosso nome: Supabase (banco de dados e armazenamento de fotos), Vercel (hospedagem), PagBank (pagamentos), Google (envio dos e-mails e login com Google) e Anthropic (análise da foto na classificação por IA, apenas quando você usa esse recurso).',
     'Os quadros de cotação são carregados do TradingView, que pode coletar dados técnicos de navegação conforme a política dele.',
     'Alguns desses serviços ficam fora do Brasil; nesses casos a transferência segue as regras da LGPD.',
+    'Pedidos de crédito ou CPR: só quando você marca a autorização, compartilhamos seu nome, contato e o pedido com cooperativas e instituições financeiras parceiras, para que façam propostas. Você pode retirar o pedido a qualquer momento.',
+    'Conta empresarial: ao entrar numa empresa com o código de convite, os administradores dela passam a ver seus lotes, vendas e compras no painel da empresa. Você pode sair quando quiser.',
     'Não vendemos seus dados. Podemos compartilhá-los com autoridades quando a lei exigir.',
   ]),
   (titulo: '5. Por quanto tempo guardamos', paragrafos: [
