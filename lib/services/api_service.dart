@@ -105,6 +105,16 @@ class ApiService {
   }
 
   // ── Cafés ────────────────────────────────────────────────────────────
+  /// Endereço do servidor (usado nos links públicos de compartilhamento)
+  static String get baseUrl => _base;
+
+  /// Um lote pelo id (usado quando alguém abre o link compartilhado)
+  static Future<CafeModel> getCafe(String id) async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base/cafes/$id'), headers: h);
+    return CafeModel.fromMap(_decode(res));
+  }
+
   static Future<List<CafeModel>> getCafes({
     String? usuarioId,
     String? tipo,

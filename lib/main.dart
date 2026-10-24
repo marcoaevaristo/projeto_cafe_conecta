@@ -1,3 +1,4 @@
+import 'screens/detalhes_cafe_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
@@ -63,11 +64,22 @@ class _SplashState extends State<_Splash> {
     await state.tryRestoreSession();
     ApiService.registrarVisita(); // sem await: não atrasa a abertura
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
+    final navigator = Navigator.of(context);
+    navigator.pushReplacement(
       MaterialPageRoute(
         builder: (_) => state.logado ? const MainScreen() : const BoasVindasScreen(),
       ),
     );
+    // Chegou por um link compartilhado (?lote=ID): abre o lote por cima
+    final loteId = Uri.base.queryParameters['lote'];
+    if (loteId != null && loteId.isNotEmpty) {
+      try {
+        final cafe = await ApiService.getCafe(loteId);
+        navigator.push(MaterialPageRoute(builder: (_) => DetalhesCafeScreen(cafe: cafe)));
+      } catch (_) {
+        // lote removido ou link inválido: segue na tela inicial
+      }
+    }
   }
 
   @override

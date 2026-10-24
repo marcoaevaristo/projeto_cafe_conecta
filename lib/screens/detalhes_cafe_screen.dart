@@ -1,5 +1,6 @@
 // lib/screens/detalhes_cafe_screen.dart
 
+import '../utils/compartilhar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -109,6 +110,11 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
             expandedHeight: 200,
             pinned: true,
             actions: [
+              IconButton(
+                tooltip: 'Compartilhar',
+                icon: const Icon(Icons.share_outlined, color: CafeColors.cream),
+                onPressed: () => compartilharLote(context, cafe),
+              ),
               if (usuario != null)
                 IconButton(
                   icon: Icon(_favorito ? Icons.favorite : Icons.favorite_border,

@@ -1,5 +1,6 @@
 // lib/widgets/acoes_anuncio.dart — Editar, Pausar/Reativar, Vendido, Encerrar e Excluir
 // um anúncio do próprio usuário. Usado em "Meus anúncios" e nos detalhes do lote.
+import '../utils/compartilhar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -186,6 +187,9 @@ class _AcoesAnuncioState extends State<AcoesAnuncio> {
       spacing: 4,
       children: [
         botao(Icons.edit_outlined, 'Editar', _editar),
+        if (status == 'ativo')
+          botao(Icons.share_outlined, 'Compartilhar', () => compartilharLote(context, widget.cafe),
+              cor: const Color(0xFF128C7E)),
         if (status == 'ativo')
           botao(Icons.pause_circle_outline, 'Pausar', () => _status('pausado'))
         else
