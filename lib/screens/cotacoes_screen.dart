@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/cotacoes_service.dart';
 import '../utils/theme.dart';
+import '../widgets/conversor_bolsa.dart';
 import '../widgets/tradingview/tradingview_widget.dart';
 
 // Configuração comum dos widgets do TradingView
@@ -104,6 +105,14 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
     }
   }
 
+  double? get _mediaArabica {
+    final tipos = (_indice?['por_tipo'] as List? ?? []).cast<Map<String, dynamic>>();
+    for (final t in tipos) {
+      if (t['tipo'] == 'Arábica') return (t['preco_medio'] as num?)?.toDouble();
+    }
+    return null;
+  }
+
   Future<void> _carregarIndice() async {
     try {
       final i = await CotacoesService.fetchIndice();
@@ -151,6 +160,8 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
               'Arábica NY (ref.): contrato à vista da corretora Pepperstone, que acompanha o Contrato C '
               'de Nova York, em centavos de dólar por libra-peso. O contrato oficial da bolsa ICE, o '
               'robusta de Londres e os preços por região abrem nos links abaixo.'),
+          const SizedBox(height: 10),
+          ConversorBolsa(dolarPtax: _dolar?.cotacaoVenda, mediaArabicaApp: _mediaArabica),
           _titulo('Dólar'),
           _cardDolar(),
           const SizedBox(height: 10),
