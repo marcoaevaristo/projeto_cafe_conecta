@@ -1,22 +1,15 @@
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'api_service.dart';
 
-@JS('cafePush')
-external _CafePush? get _cafePush;
-
-extension type _CafePush._(JSObject _) implements JSObject {
-  external bool suportado();
-  external JSPromise<JSString> ativar(String chavePublica);
-  external JSPromise<JSString> atual();
-  external JSPromise<JSString> desativar();
-}
+JSObject? get _cafePush => globalContext['cafePush'] as JSObject?;
 
 class PushService {
   static bool get suportado {
     try {
-      return _cafePush?.suportado() ?? false;
+      return (_cafePush?.callMethod<JSBoolean>('suportado'.toJS))?.toDart ?? false;
     } catch (_) {
       return false;
     }
@@ -26,7 +19,7 @@ class PushService {
   static Future<bool> ativo() async {
     if (!suportado) return false;
     try {
-      return (await _cafePush!.atual().toDart).toDart.isNotEmpty;
+      return (await _cafePush!.callMethod<JSPromise<JSString>>('atual'.toJS).toDart).toDart.isNotEmpty;
     } catch (_) {
       return false;
     }
@@ -40,7 +33,7 @@ class PushService {
     if (chave == null) throw 'Notificações indisponíveis no servidor agora. Tente mais tarde.';
     String json;
     try {
-      json = (await _cafePush!.ativar(chave).toDart).toDart;
+      json = (await _cafePush!.callMethod<JSPromise<JSString>>('ativar'.toJS, chave.toJS).toDart).toDart;
     } catch (e) {
       final t = '$e';
       throw t.contains('negada')
@@ -52,7 +45,7 @@ class PushService {
 
   static Future<void> desativar() async {
     if (!suportado) return;
-    final endpoint = (await _cafePush!.desativar().toDart).toDart;
+    final endpoint = (await _cafePush!.callMethod<JSPromise<JSString>>('desativar'.toJS).toDart).toDart;
     if (endpoint.isNotEmpty) await ApiService.cancelarPush(endpoint);
   }
 }

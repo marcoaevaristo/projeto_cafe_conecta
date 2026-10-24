@@ -1,14 +1,10 @@
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 
-@JS('cafeGoogle')
-external _CafeGoogle? get _cafeGoogle;
-
-extension type _CafeGoogle._(JSObject _) implements JSObject {
-  external JSPromise<JSAny?> botao(web.HTMLElement elemento, String clientId, int largura, JSFunction aoEntrar);
-}
+JSObject? get _cafeGoogle => globalContext['cafeGoogle'] as JSObject?;
 
 class BotaoGoogle extends StatelessWidget {
   final String clientId;
@@ -31,7 +27,7 @@ class BotaoGoogle extends StatelessWidget {
               ..justifyContent = 'center'
               ..alignItems = 'center';
             final cb = ((JSString cred) => aoEntrar(cred.toDart)).toJS;
-            _cafeGoogle?.botao(div, clientId, largura, cb);
+            _cafeGoogle?.callMethodVarArgs<JSAny?>('botao'.toJS, [div, clientId.toJS, largura.toJS, cb]);
           },
         ),
       );
