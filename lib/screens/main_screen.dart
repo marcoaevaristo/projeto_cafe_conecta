@@ -2,6 +2,7 @@
 // Celular: barra inferior com 5 itens (Início, Catálogo, Propostas, Mensagens, Menu)
 //          e menu lateral com o restante.
 // Tela larga (computador/tablet): menu lateral fixo com tudo, sem barra inferior.
+import 'boas_vindas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -307,7 +308,7 @@ class _MenuNavegacao extends StatelessWidget {
             final navigator = Navigator.of(context);
             await context.read<AppState>().logout();
             navigator.pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
+                MaterialPageRoute(builder: (_) => const BoasVindasScreen()), (_) => false);
           },
         ),
         const SizedBox(height: 16),

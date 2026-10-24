@@ -22,7 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loading = true;
   String _tipoFiltro = 'Todos';
   String _classiFiltro = 'Todas';
-  int _scoreMinimo = 70;
+  // null = sem filtro de nota: mostra também lotes sem classificação por IA
+  int? _scoreMinimo;
   final _searchCtrl = TextEditingController();
   String _busca = '';
 
@@ -36,15 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _carregar() async {
     setState(() => _loading = true);
-    final cafes = await ApiService.getCafes(
-      tipo: _tipoFiltro == 'Todos' ? null : _tipoFiltro,
-      classificacao: _classiFiltro == 'Todas' ? null : _classiFiltro,
-      scoreMinimo: _scoreMinimo,
-    );
-    setState(() {
-      _cafes = cafes;
-      _loading = false;
-    });
+    try {
+      final cafes = await ApiService.getCafes(
+        tipo: _tipoFiltro == 'Todos' ? null : _tipoFiltro,
+        classificacao: _classiFiltro == 'Todas' ? null : _classiFiltro,
+        scoreMinimo: _scoreMinimo,
+      );
+      if (mounted) setState(() { _cafes = cafes; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() { _cafes = []; _loading = false; });
+    }
   }
 
   List<CafeModel> get _filtrados => _busca.isEmpty
@@ -104,8 +106,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   : _filtrados.isEmpty
                       ? EmptyState(
                           icon: Icons.search_off,
-                          titulo: 'Nenhum café com score ≥ $_scoreMinimo',
-                          subtitulo: 'Ajuste o filtro de qualidade.')
+                          titulo: _scoreMinimo == null
+                              ? 'Nenhum lote encontrado'
+                              : 'Nenhum café com nota ≥ $_scoreMinimo',
+                          subtitulo: _scoreMinimo == null
+                              ? 'Tente outros filtros ou volte mais tarde.'
+                              : 'Ajuste o filtro de qualidade.')
                       : RefreshIndicator(
                           onRefresh: _carregar,
                           child: ListView.builder(
@@ -134,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
                 color: CafeColors.caramel.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10)),
-            child: Text('$_scoreMinimo pts',
+            child: Text(_scoreMinimo == null ? 'Todos' : '$_scoreMinimo pts',
                 style: GoogleFonts.playfairDisplay(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -150,18 +156,21 @@ class _HomeScreenState extends State<HomeScreen> {
             trackHeight: 4,
           ),
           child: Slider(
-            value: _scoreMinimo.toDouble(),
+            value: (_scoreMinimo ?? 60).toDouble(),
             min: 60,
             max: 95,
             divisions: 7,
             onChanged: (v) {
-              setState(() => _scoreMinimo = v.round());
+              // no começo da régua = sem filtro (inclui lotes sem nota)
+              setState(() => _scoreMinimo = v.round() <= 60 ? null : v.round());
               _carregar();
             },
           ),
         ),
         Row(children: [
-          _scoreChip('Todos ≥70', 70),
+          _scoreChip('Todos', null),
+          const SizedBox(width: 6),
+          _scoreChip('≥70', 70),
           const SizedBox(width: 6),
           _scoreChip('Bom ≥80', 80),
           const SizedBox(width: 6),
@@ -171,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _scoreChip(String label, int value) {
+  Widget _scoreChip(String label, int? value) {
     final sel = _scoreMinimo == value;
     return GestureDetector(
       onTap: () {

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'login_screen.dart';
 import '../widgets/acoes_anuncio.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
@@ -55,9 +56,17 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8)],
           ),
           child: usuario == null
-              ? Text('Entre na sua conta para conversar ou fazer uma proposta.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.dmSans(fontSize: 13, color: CafeColors.lightRoast))
+              ? ElevatedButton.icon(
+                  onPressed: () => Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                  icon: const Icon(Icons.login),
+                  label: const Text('Entrar para conversar ou fazer proposta'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CafeColors.caramel,
+                    foregroundColor: CafeColors.espresso,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                )
               : meuAnuncio
                   // Dono do anúncio: gerenciar. Depois de qualquer ação volta para a
                   // lista, que recarrega com os dados novos.

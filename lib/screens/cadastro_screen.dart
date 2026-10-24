@@ -175,8 +175,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
     if (!mounted) return;
     setState(() => _loading = false);
     if (ok) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const MainScreen()));
+      Navigator.pushAndRemoveUntil(context,
+          MaterialPageRoute(builder: (_) => const MainScreen()), (_) => false);
     } else {
       setState(() => _erro = 'E-mail já cadastrado ou erro interno.');
     }

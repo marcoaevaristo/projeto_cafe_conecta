@@ -1,5 +1,6 @@
 // lib/screens/configuracoes_screen.dart
 // Dados da conta, senha, assinatura e exclusão de conta.
+import 'boas_vindas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -292,7 +293,7 @@ class _ExcluirContaScreenState extends State<_ExcluirContaScreen> {
       final navigator = Navigator.of(context);
       await context.read<AppState>().logout();
       navigator.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
+          MaterialPageRoute(builder: (_) => const BoasVindasScreen()), (_) => false);
       messenger.showSnackBar(const SnackBar(content: Text('Sua conta foi excluída')));
     } catch (e) {
       if (mounted) {

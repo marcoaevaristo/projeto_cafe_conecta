@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'services/api_service.dart';
 import 'services/app_state.dart';
 import 'utils/theme.dart';
-import 'screens/login_screen.dart';
+import 'screens/boas_vindas_screen.dart';
 import 'screens/main_screen.dart';
 
 void main() {
@@ -65,7 +65,7 @@ class _SplashState extends State<_Splash> {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => state.logado ? const MainScreen() : const LoginScreen(),
+        builder: (_) => state.logado ? const MainScreen() : const BoasVindasScreen(),
       ),
     );
   }
