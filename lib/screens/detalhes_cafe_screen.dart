@@ -28,6 +28,7 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
   void initState() {
     super.initState();
     _checkFavorito();
+    if (widget.cafe.id != null) ApiService.registrarVisualizacao(widget.cafe.id!);
   }
 
   Future<void> _checkFavorito() async {

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/cafe_model.dart';
 import '../services/app_state.dart';
 import '../services/api_service.dart';
+import '../services/cotacoes_service.dart';
 import '../utils/theme.dart';
 import '../widgets/cafe_card.dart';
 
@@ -17,6 +18,8 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic> _stats = {};
+  // Participação de cada tipo nas sacas dos lotes ativos (Índice Café Conecta)
+  List<Map<String, dynamic>> _porTipo = [];
   List<HistoricoPrecoModel> _historico = [];
   bool _loading = true;
 
@@ -42,10 +45,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       hist = await ApiService.getHistoricoPrecos();
     } catch (_) {}
+    List<Map<String, dynamic>> porTipo = [];
+    try {
+      final indice = await CotacoesService.fetchIndice();
+      porTipo = (indice['por_tipo'] as List? ?? []).cast<Map<String, dynamic>>();
+    } catch (_) {}
     if (!mounted) return;
     setState(() {
       _stats = stats;
       _historico = hist;
+      _porTipo = porTipo;
       _loading = false;
     });
   }
@@ -265,69 +274,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         fontWeight: FontWeight.w700,
                                         color: CafeColors.darkRoast)),
                                 const SizedBox(height: 14),
-                                Row(children: [
-                                  SizedBox(
-                                      height: 120,
-                                      width: 120,
-                                      child: PieChart(PieChartData(
-                                        sectionsSpace: 2,
-                                        centerSpaceRadius: 30,
-                                        sections: [
-                                          PieChartSectionData(
-                                              value: 65,
-                                              color: CafeColors.caramel,
-                                              title: '65%',
-                                              radius: 30,
-                                              titleStyle: GoogleFonts.dmSans(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Colors.white)),
-                                          PieChartSectionData(
-                                              value: 25,
-                                              color: CafeColors.greenOk,
-                                              title: '25%',
-                                              radius: 30,
-                                              titleStyle: GoogleFonts.dmSans(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Colors.white)),
-                                          PieChartSectionData(
-                                              value: 10,
-                                              color: CafeColors.blue,
-                                              title: '10%',
-                                              radius: 30,
-                                              titleStyle: GoogleFonts.dmSans(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Colors.white)),
-                                        ],
-                                      ))),
-                                  const SizedBox(width: 16),
-                                  const Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _LegendItem(
-                                            color: CafeColors.caramel,
-                                            label: 'Arábica',
-                                            pct: '65%'),
-                                        SizedBox(height: 8),
-                                        _LegendItem(
-                                            color: CafeColors.greenOk,
-                                            label: 'Conilon',
-                                            pct: '25%'),
-                                        SizedBox(height: 8),
-                                        _LegendItem(
-                                            color: CafeColors.blue,
-                                            label: 'Robusta',
-                                            pct: '10%'),
-                                      ]),
-                                ]),
+                                Text('Sacas em lotes ativos no app, por tipo',
+                                    style: GoogleFonts.dmSans(
+                                        fontSize: 11, color: CafeColors.lightRoast)),
+                                const SizedBox(height: 12),
+                                _mercadoPorTipo(),
                               ]))),
                   const SizedBox(height: 20),
                 ])),
       ),
     );
+  }
+
+  Widget _mercadoPorTipo() {
+    const cores = [CafeColors.caramel, CafeColors.greenOk, CafeColors.blue, CafeColors.gold, CafeColors.mediumRoast];
+    final total = _porTipo.fold<num>(0, (s, t) => s + ((t['sacas'] as num?) ?? 0));
+    if (total <= 0) {
+      return Text('Ainda não há lotes ativos no app.',
+          style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast));
+    }
+    final itens = [
+      for (var i = 0; i < _porTipo.length && i < cores.length; i++)
+        (
+          tipo: '${_porTipo[i]['tipo']}',
+          pct: ((_porTipo[i]['sacas'] as num?) ?? 0) / total * 100,
+          cor: cores[i],
+        ),
+    ];
+    String fmt(double p) => '${p.round()}%';
+    return Row(children: [
+      SizedBox(
+          height: 120,
+          width: 120,
+          child: PieChart(PieChartData(
+            sectionsSpace: 2,
+            centerSpaceRadius: 30,
+            sections: [
+              for (final it in itens)
+                PieChartSectionData(
+                    value: it.pct,
+                    color: it.cor,
+                    title: it.pct >= 8 ? fmt(it.pct) : '',
+                    radius: 30,
+                    titleStyle: GoogleFonts.dmSans(
+                        fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white)),
+            ],
+          ))),
+      const SizedBox(width: 16),
+      Expanded(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          for (final it in itens) ...[
+            _LegendItem(color: it.cor, label: it.tipo, pct: fmt(it.pct)),
+            const SizedBox(height: 8),
+          ],
+        ]),
+      ),
+    ]);
   }
 
   // Média mensal real dos lotes de Arábica do Sul de Minas anunciados no app

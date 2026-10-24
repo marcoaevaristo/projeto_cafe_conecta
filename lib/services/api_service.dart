@@ -194,6 +194,16 @@ class ApiService {
     _decode(res);
   }
 
+  /// Conta uma visualização dos detalhes do lote (o servidor ignora o dono e repetições no dia).
+  static Future<void> registrarVisualizacao(String cafeId) async {
+    try {
+      final h = await _authHeaders();
+      await http.post(Uri.parse('$_base/cafes/$cafeId/visualizacao'), headers: h);
+    } catch (_) {
+      // métrica: nunca atrapalha a tela
+    }
+  }
+
   static Future<void> excluirCafe(String cafeId) async {
     final h = await _authHeaders();
     final res = await http.delete(Uri.parse('$_base/cafes/$cafeId'), headers: h);
