@@ -13,6 +13,7 @@ import '../services/app_state.dart';
 import '../services/api_service.dart';
 import '../utils/theme.dart';
 import 'nova_proposta_screen.dart';
+import 'amostras_screen.dart';
 import '../utils/conversa_lote.dart';
 
 class DetalhesCafeScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class DetalhesCafeScreen extends StatefulWidget {
 
 class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
   bool _favorito = false;
+  List<Map<String, dynamic>> _provas = [];
   final _brl = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
   @override
@@ -31,6 +33,15 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
     super.initState();
     _checkFavorito();
     if (widget.cafe.id != null) ApiService.registrarVisualizacao(widget.cafe.id!);
+    _carregarProvas();
+  }
+
+  Future<void> _carregarProvas() async {
+    if (widget.cafe.id == null || context.read<AppState>().usuario == null) return;
+    try {
+      final p = await ApiService.getProvasDoLote(widget.cafe.id!);
+      if (mounted) setState(() => _provas = p);
+    } catch (_) {}
   }
 
   Future<void> _checkFavorito() async {
@@ -207,6 +218,31 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                         _linha('Certificações', cafe.certificacoes.join(', ')),
                     ]),
                   ],
+                  if (_provas.isNotEmpty) ...[
+                    _secao('Provas de amostra'),
+                    _Card(children: [
+                      for (final p in _provas)
+                        _linha(
+                          p['nota'] != null
+                              ? 'Nota ${(p['nota'] as num).toStringAsFixed(1).replaceAll('.', ',')}'
+                              : 'Prova',
+                          _resumoProva(p),
+                        ),
+                    ]),
+                  ],
+                  if (usuario != null && !meuAnuncio && cafe.status == 'ativo') ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => pedirAmostra(context, cafe),
+                      icon: const Icon(Icons.inventory_outlined),
+                      label: const Text('Pedir amostra deste lote'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: CafeColors.darkRoast,
+                        side: const BorderSide(color: CafeColors.caramel),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ],
                   _secao('Localização'),
                   _Card(children: [
                     _linha('Região', cafe.regiao),
@@ -252,6 +288,14 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
         ],
       ),
     );
+  }
+
+  String _resumoProva(Map<String, dynamic> p) {
+    final partes = [
+      if (p['bebida_resultado'] != null) '${p['bebida_resultado']}',
+      if (p['defeitos'] != null) '${p['defeitos']} defeitos',
+    ];
+    return partes.isEmpty ? '—' : partes.join(' · ');
   }
 
   Widget _secao(String t) => Padding(

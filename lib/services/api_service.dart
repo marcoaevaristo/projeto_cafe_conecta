@@ -479,6 +479,14 @@ class ApiService {
   static Future<Map<String, dynamic>> responderOferta(String ofertaId, String status) =>
       _enviar('PATCH', '/pedidos/ofertas/$ofertaId', {'status': status});
 
+  // ── Amostras ─────────────────────────────────────────────────────────
+  static Future<List<Map<String, dynamic>>> getAmostras() => _lista('/amostras');
+  static Future<List<Map<String, dynamic>>> getProvasDoLote(String cafeId) => _lista('/amostras/lote/$cafeId');
+  static Future<Map<String, dynamic>> pedirAmostra(String cafeId, String endereco, String observacoes) =>
+      _enviar('POST', '/amostras', {'cafe_id': cafeId, 'endereco': endereco, 'observacoes': observacoes});
+  static Future<Map<String, dynamic>> atualizarAmostra(String id, Map<String, dynamic> dados) =>
+      _enviar('PATCH', '/amostras/$id', dados);
+
   /// Custo de produção por saca do usuário (null = não informado)
   static Future<double?> getCusto() async {
     final h = await _authHeaders();
