@@ -48,6 +48,8 @@ class ConfiguracoesScreen extends StatelessWidget {
             ),
           ]),
         ),
+        _titulo('Avisos'),
+        const Card(child: _AvisosEmail()),
         _titulo('Segurança'),
         Card(
           child: ListTile(
@@ -96,6 +98,52 @@ class ConfiguracoesScreen extends StatelessWidget {
                 letterSpacing: 0.8,
                 fontWeight: FontWeight.w700,
                 color: CafeColors.lightRoast)),
+      );
+}
+
+// ── Avisos por e-mail ─────────────────────────────────────────────────
+class _AvisosEmail extends StatefulWidget {
+  const _AvisosEmail();
+  @override
+  State<_AvisosEmail> createState() => _AvisosEmailState();
+}
+
+class _AvisosEmailState extends State<_AvisosEmail> {
+  bool? _ligado;
+  bool _salvando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ApiService.getAvisosEmail().then((v) {
+      if (mounted) setState(() => _ligado = v);
+    }).catchError((_) {
+      if (mounted) setState(() => _ligado = true);
+    });
+  }
+
+  Future<void> _alterar(bool v) async {
+    setState(() { _ligado = v; _salvando = true; });
+    try {
+      await ApiService.setAvisosEmail(v);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _ligado = !v);
+        mostrarErro(context, e);
+      }
+    } finally {
+      if (mounted) setState(() => _salvando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => SwitchListTile(
+        secondary: const Icon(Icons.mark_email_unread_outlined, color: CafeColors.caramel),
+        title: const Text('Avisos por e-mail'),
+        subtitle: const Text('Nova proposta, resposta, mensagem e alerta de preço'),
+        value: _ligado ?? true,
+        activeColor: CafeColors.caramel,
+        onChanged: _ligado == null || _salvando ? null : _alterar,
       );
 }
 

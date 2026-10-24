@@ -427,6 +427,20 @@ class ApiService {
     _decode(res);
   }
 
+  /// Avisos por e-mail ligados? (padrão: sim)
+  static Future<bool> getAvisosEmail() async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base/auth/notificacoes'), headers: h);
+    return _decode(res)['email'] != false;
+  }
+
+  static Future<void> setAvisosEmail(bool ligado) async {
+    final h = await _authHeaders();
+    final res = await http.put(Uri.parse('$_base/auth/notificacoes'),
+        headers: h, body: jsonEncode({'email': ligado}));
+    _decode(res);
+  }
+
   static Future<void> trocarSenha(String senhaAtual, String novaSenha) async {
     final h = await _authHeaders();
     final res = await http.post(Uri.parse('$_base/auth/trocar-senha'),
