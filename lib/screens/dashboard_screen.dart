@@ -125,25 +125,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       childAspectRatio: 1.6,
                       children: [
                         _KpiCard(
-                            icon: '☕',
+                            icon: Icons.coffee_outlined,
                             label: 'Lotes Ativos',
                             value: '${_stats["lotes_ativos"] ?? 0}',
                             delta: '${_stats["lotes_total"] ?? 0} no total',
                             color: CafeColors.caramel),
                         _KpiCard(
-                            icon: '💬',
+                            icon: Icons.chat_bubble_outline,
                             label: 'Mensagens',
                             value: '${_stats["mensagens_nao_lidas"] ?? 0}',
                             delta: 'não lidas',
                             color: CafeColors.blue),
                         _KpiCard(
-                            icon: '📋',
+                            icon: Icons.assignment_outlined,
                             label: 'Propostas',
                             value: '${_stats["propostas_recebidas"] ?? 0}',
                             delta: '${_stats["propostas_pendentes"] ?? 0} aguardando resposta',
                             color: CafeColors.gold),
                         _KpiCard(
-                            icon: '🤝',
+                            icon: Icons.handshake_outlined,
                             label: 'Negócios',
                             value: '${_stats["negocios_fechados"] ?? 0}',
                             delta: 'propostas aceitas',
@@ -390,6 +390,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         bottomTitles: AxisTitles(
             sideTitles: SideTitles(
                 showTitles: true,
+                interval: 1,
                 reservedSize: 18,
                 getTitlesWidget: (v, _) {
                   final i = v.toInt();
@@ -429,7 +430,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class _KpiCard extends StatelessWidget {
-  final String icon, label, value, delta;
+  final IconData icon;
+  final String label, value, delta;
   final Color color;
   const _KpiCard(
       {required this.icon,
@@ -455,8 +457,7 @@ class _KpiCard extends StatelessWidget {
                               color: color.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8)),
                           child: Center(
-                              child: Text(icon,
-                                  style: const TextStyle(fontSize: 15)))),
+                              child: Icon(icon, size: 18, color: color))),
                     ]),
                 Text(value,
                     style: GoogleFonts.playfairDisplay(

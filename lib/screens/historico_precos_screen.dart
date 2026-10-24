@@ -242,6 +242,7 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
                                       bottomTitles: AxisTitles(
                                           sideTitles: SideTitles(
                                               showTitles: true,
+                                              interval: 1,
                                               reservedSize: 22,
                                               getTitlesWidget: (v, _) {
                                                 final idx = v.toInt();
