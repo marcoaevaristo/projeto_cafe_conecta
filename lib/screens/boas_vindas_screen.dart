@@ -221,20 +221,14 @@ class CatalogoPublicoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lotes disponíveis'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-            style: TextButton.styleFrom(foregroundColor: CafeColors.gold),
-            child: const Text('Entrar'),
-          ),
-          const SizedBox(width: 8),
-        ],
+    return HomeScreen(acoes: [
+      TextButton(
+        onPressed: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+        style: TextButton.styleFrom(foregroundColor: CafeColors.gold),
+        child: const Text('Entrar'),
       ),
-      body: const HomeScreen(),
-    );
+      const SizedBox(width: 8),
+    ]);
   }
 }

@@ -12,7 +12,9 @@ import 'nova_proposta_screen.dart';
 import '../utils/conversa_lote.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  /// Botões extras no topo (ex.: "Entrar" no catálogo público)
+  final List<Widget>? acoes;
+  const HomeScreen({super.key, this.acoes});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -69,6 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
             floating: false,
             pinned: true,
             backgroundColor: CafeColors.espresso,
+            foregroundColor: CafeColors.cream,
+            actions: widget.acoes,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
