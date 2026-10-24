@@ -195,6 +195,18 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                     _linha('Peneira', cafe.peneira ?? '—'),
                     _linha('Safra', cafe.safra ?? '—'),
                   ]),
+                  if (cafe.temFichaEspecial) ...[
+                    _secao('Ficha do Café'),
+                    _Card(children: [
+                      if (cafe.variedade != null) _linha('Variedade', cafe.variedade!),
+                      if (cafe.processamento != null) _linha('Processamento', cafe.processamento!),
+                      if (cafe.altitude != null) _linha('Altitude', '${cafe.altitude} m'),
+                      if (cafe.pontuacaoSca != null)
+                        _linha('Pontuação SCA', cafe.pontuacaoSca!.toStringAsFixed(1).replaceAll('.', ',')),
+                      if (cafe.certificacoes.isNotEmpty)
+                        _linha('Certificações', cafe.certificacoes.join(', ')),
+                    ]),
+                  ],
                   _secao('Localização'),
                   _Card(children: [
                     _linha('Região', cafe.regiao),
@@ -261,11 +273,15 @@ class _DetalhesCafeScreenState extends State<DetalhesCafeScreen> {
                     color: CafeColors.lightRoast,
                     fontSize: 13,
                     fontWeight: FontWeight.w500)),
-            Text(v,
-                style: GoogleFonts.dmSans(
-                    color: CafeColors.darkRoast,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(v,
+                  textAlign: TextAlign.right,
+                  style: GoogleFonts.dmSans(
+                      color: CafeColors.darkRoast,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600)),
+            ),
           ],
         ),
       );

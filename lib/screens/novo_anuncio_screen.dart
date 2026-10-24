@@ -34,6 +34,12 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
   final _cidadeCtrl = TextEditingController();
   final _fazendaCtrl = TextEditingController();
   final _precoCtrl = TextEditingController();
+  // Ficha do café especial (opcional)
+  String? _variedade;
+  String? _processamento;
+  final _altitudeCtrl = TextEditingController();
+  final _scaCtrl = TextEditingController();
+  final Set<String> _certificacoes = {};
   bool _loading = false;
   String? _erro;
   int? _score; // vem da classificação por IA
@@ -69,7 +75,58 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
           : p.toStringAsFixed(2).replaceAll('.', ',');
     }
     _fotosExistentes.addAll(c.fotos);
+    _variedade = c.variedade;
+    _processamento = c.processamento;
+    if (c.altitude != null) _altitudeCtrl.text = '${c.altitude}';
+    if (c.pontuacaoSca != null) {
+      _scaCtrl.text = c.pontuacaoSca!.toStringAsFixed(1).replaceAll('.', ',');
+    }
+    _certificacoes.addAll(c.certificacoes);
   }
+
+  int? get _altitude => int.tryParse(_altitudeCtrl.text.trim());
+  double? get _sca => double.tryParse(_scaCtrl.text.trim().replaceAll(',', '.'));
+
+  Widget _secaoFicha() => Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          initiallyExpanded: widget.cafe?.temFichaEspecial ?? false,
+          title: Text('Ficha do café especial (opcional)',
+              style: GoogleFonts.playfairDisplay(
+                  fontSize: 16, fontWeight: FontWeight.w700, color: CafeColors.darkRoast)),
+          subtitle: Text('Variedade, processamento, altitude, pontuação SCA e certificações',
+              style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast)),
+          children: [
+            const SizedBox(height: 8),
+            _drop('Variedade', variedadesCafe, _variedade, (v) => setState(() => _variedade = v)),
+            _drop('Processamento', processamentosCafe, _processamento,
+                (v) => setState(() => _processamento = v)),
+            Row(children: [
+              Expanded(child: _campo(_altitudeCtrl, 'Altitude (m)', TextInputType.number)),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _campo(_scaCtrl, 'Pontuação SCA (80–100)',
+                      const TextInputType.numberWithOptions(decimal: true))),
+            ]),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Certificações',
+                  style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
+            const SizedBox(height: 6),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final c in certificacoesCafe)
+                FilterChip(
+                  label: Text(c),
+                  selected: _certificacoes.contains(c),
+                  onSelected: (v) => setState(() => v ? _certificacoes.add(c) : _certificacoes.remove(c)),
+                ),
+            ]),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
 
   @override
   void dispose() {
@@ -77,6 +134,8 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
     _cidadeCtrl.dispose();
     _fazendaCtrl.dispose();
     _precoCtrl.dispose();
+    _altitudeCtrl.dispose();
+    _scaCtrl.dispose();
     super.dispose();
   }
 
@@ -226,6 +285,8 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
                 (v) => setState(() => _regiao = v)),
             _campo(_cidadeCtrl, 'Cidade', TextInputType.text),
             _campo(_fazendaCtrl, 'Fazenda / Propriedade', TextInputType.text),
+            const SizedBox(height: 8),
+            _secaoFicha(),
             _secao('Fotos do lote'),
             _secaoFotos(),
             _secao('Safra'),
@@ -341,6 +402,11 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
           _fazendaCtrl.text.trim().isEmpty ? null : _fazendaCtrl.text.trim(),
       precoSaca: _lerPreco(_precoCtrl.text),
       scoreQualidade: _score,
+      variedade: _variedade,
+      processamento: _processamento,
+      altitude: _altitude,
+      pontuacaoSca: _sca,
+      certificacoes: _certificacoes.toList(),
     );
 
     try {
@@ -404,6 +470,13 @@ class _NovoAnuncioScreenState extends State<NovoAnuncioScreen> {
         'cidade': _cidadeCtrl.text.trim(),
         'fazenda': fazenda.isEmpty ? null : fazenda,
         'score': _score,
+        // ficha: envia quando preenchida ou quando o lote já tinha ficha (para permitir apagar)
+        if (_variedade != null || widget.cafe!.variedade != null) 'variedade': _variedade,
+        if (_processamento != null || widget.cafe!.processamento != null) 'processamento': _processamento,
+        if (_altitude != null || widget.cafe!.altitude != null) 'altitude': _altitude,
+        if (_sca != null || widget.cafe!.pontuacaoSca != null) 'pontuacao_sca': _sca,
+        if (_certificacoes.isNotEmpty || widget.cafe!.certificacoes.isNotEmpty)
+          'certificacoes': _certificacoes.toList(),
       });
       // Fotos: primeiro tira as removidas (libera espaço no limite), depois envia as novas
       Object? erroFoto;

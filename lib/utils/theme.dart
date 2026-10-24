@@ -107,6 +107,20 @@ class CafeTheme {
 }
 
 const tiposCafe = ['Arábica', 'Conilon', 'Robusta'];
+
+// Ficha do café especial
+const variedadesCafe = [
+  'Catuaí Vermelho', 'Catuaí Amarelo', 'Mundo Novo', 'Bourbon Amarelo', 'Bourbon Vermelho',
+  'Topázio', 'Catucaí', 'Arara', 'Acaiá', 'Icatu', 'Obatã', 'Paraíso', 'Geisha',
+  'Conilon Vitória', 'Robusta Amazônico', 'Outra',
+];
+const processamentosCafe = [
+  'Natural', 'Cereja descascado', 'Despolpado', 'Lavado', 'Fermentado', 'Honey',
+];
+const certificacoesCafe = [
+  'Orgânico', 'Fair Trade', 'Rainforest Alliance', '4C', 'Certifica Minas',
+  'Indicação Geográfica', 'Café do Cerrado (DO)',
+];
 const classificacoesCafe = [
   'Tipo 4',
   'Tipo 5',

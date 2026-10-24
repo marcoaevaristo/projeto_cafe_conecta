@@ -24,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loading = true;
   String _tipoFiltro = 'Todos';
   String _classiFiltro = 'Todas';
+  String _processoFiltro = 'Todos';
+  String _certFiltro = 'Todas';
   // null = sem filtro de nota: mostra também lotes sem classificação por IA
   int? _scoreMinimo;
   final _searchCtrl = TextEditingController();
@@ -51,15 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  List<CafeModel> get _filtrados => _busca.isEmpty
-      ? _cafes
-      : _cafes
-          .where((c) =>
-              c.tipo.toLowerCase().contains(_busca) ||
-              c.classificacao.toLowerCase().contains(_busca) ||
-              c.cidade.toLowerCase().contains(_busca) ||
-              (c.fazenda?.toLowerCase().contains(_busca) ?? false))
-          .toList();
+  List<CafeModel> get _filtrados => _cafes.where((c) {
+        if (_processoFiltro != 'Todos' && c.processamento != _processoFiltro) return false;
+        if (_certFiltro != 'Todas' && !c.certificacoes.contains(_certFiltro)) return false;
+        if (_busca.isEmpty) return true;
+        return c.tipo.toLowerCase().contains(_busca) ||
+            c.classificacao.toLowerCase().contains(_busca) ||
+            c.cidade.toLowerCase().contains(_busca) ||
+            (c.variedade?.toLowerCase().contains(_busca) ?? false) ||
+            (c.fazenda?.toLowerCase().contains(_busca) ?? false);
+      }).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -247,6 +250,17 @@ class _HomeScreenState extends State<HomeScreen> {
             _classiFiltro = v!;
             _carregar();
           })),
+        ]),
+        const SizedBox(height: 8),
+        // filtros de cafés especiais (aplicados na lista já carregada)
+        Row(children: [
+          Expanded(
+              child: _dropdown('Processamento', ['Todos', ...processamentosCafe], _processoFiltro,
+                  (v) => setState(() => _processoFiltro = v!))),
+          const SizedBox(width: 8),
+          Expanded(
+              child: _dropdown('Certificação', ['Todas', ...certificacoesCafe], _certFiltro,
+                  (v) => setState(() => _certFiltro = v!))),
         ]),
         const SizedBox(height: 8),
       ]),

@@ -27,6 +27,16 @@ class CafeModel {
   final bool destaque;
   /// URLs públicas das fotos do lote
   final List<String> fotos;
+  // Ficha do café especial (opcional)
+  final String? variedade;
+  final String? processamento;
+  final int? altitude;
+  final double? pontuacaoSca;
+  final List<String> certificacoes;
+
+  bool get temFichaEspecial =>
+      variedade != null || processamento != null || altitude != null ||
+      pontuacaoSca != null || certificacoes.isNotEmpty;
 
   CafeModel({
     this.id, required this.usuarioId, required this.tipo,
@@ -39,6 +49,8 @@ class CafeModel {
     this.scoreQualidade, this.verificado = false,
     this.lat, this.lng,
     this.destaque = false, this.fotos = const [],
+    this.variedade, this.processamento, this.altitude, this.pontuacaoSca,
+    this.certificacoes = const [],
   });
 
   factory CafeModel.fromMap(Map<String, dynamic> map) => CafeModel(
@@ -69,6 +81,11 @@ class CafeModel {
     fotos: ((map['fotos'] as List?) ?? [if (map['imagem_url'] != null) map['imagem_url']])
         .map((f) => f.toString())
         .toList(),
+    variedade: map['variedade'],
+    processamento: map['processamento'],
+    altitude: (map['altitude'] as num?)?.toInt(),
+    pontuacaoSca: (map['pontuacao_sca'] as num?)?.toDouble(),
+    certificacoes: ((map['certificacoes'] as List?) ?? []).map((c) => c.toString()).toList(),
   );
 
   Map<String, dynamic> toMap() => {
@@ -80,6 +97,12 @@ class CafeModel {
     'preco_saca': precoSaca, 'status': status,
     'score': scoreQualidade,
     'lat': lat, 'lng': lng,
+    // ficha só vai quando preenchida (o banco pode ainda não ter as colunas)
+    if (variedade != null) 'variedade': variedade,
+    if (processamento != null) 'processamento': processamento,
+    if (altitude != null) 'altitude': altitude,
+    if (pontuacaoSca != null) 'pontuacao_sca': pontuacaoSca,
+    if (certificacoes.isNotEmpty) 'certificacoes': certificacoes,
   };
 
   String get nomeCurto => '$tipo – $classificacao';
