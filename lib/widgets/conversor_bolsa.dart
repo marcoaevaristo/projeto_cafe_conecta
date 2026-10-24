@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/theme.dart';
 
@@ -59,6 +60,44 @@ class _ConversorBolsaState extends State<ConversorBolsa> {
     if (widget.dolarPtax != null) {
       _dolar.text = widget.dolarPtax!.toStringAsFixed(4).replaceAll('.', ',');
     }
+    _lembrar();
+  }
+
+  // Volta com o último preço digitado, para o valor em R$ já aparecer ao abrir a tela
+  Future<void> _lembrar() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      final ny = p.getBool('conversor_ny') ?? false;
+      final v = p.getString(ny ? 'conversor_ny_valor' : 'conversor_b3_valor');
+      if (!mounted) return;
+      setState(() {
+        _ny = ny;
+        if (v != null && _valor.text.isEmpty) _valor.text = v;
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _guardar() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setBool('conversor_ny', _ny);
+      await p.setString(_ny ? 'conversor_ny_valor' : 'conversor_b3_valor', _valor.text.trim());
+    } catch (_) {}
+  }
+
+  Future<void> _trocar(bool ny) async {
+    if (ny == _ny) return;
+    await _guardar();
+    String? v;
+    try {
+      v = (await SharedPreferences.getInstance()).getString(ny ? 'conversor_ny_valor' : 'conversor_b3_valor');
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _ny = ny;
+      _valor.text = v ?? '';
+    });
+    _guardar();
   }
 
   @override
@@ -78,22 +117,22 @@ class _ConversorBolsaState extends State<ConversorBolsa> {
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Converter para R\$ por saca',
+          Text('Quanto dá em R\$ por saca?',
               style: GoogleFonts.dmSans(fontWeight: FontWeight.w700, color: CafeColors.darkRoast)),
           const SizedBox(height: 4),
-          Text('Digite o preço que aparece no quadro da bolsa.',
+          Text('Digite o preço do quadro acima (ex.: 381). O app lembra o último valor.',
               style: GoogleFonts.dmSans(fontSize: 12, color: CafeColors.lightRoast)),
           const SizedBox(height: 10),
           Wrap(spacing: 8, children: [
             ChoiceChip(
               label: const Text('B3 · US\$/saca'),
               selected: !_ny,
-              onSelected: (_) => setState(() => _ny = false),
+              onSelected: (_) => _trocar(false),
             ),
             ChoiceChip(
               label: const Text('NY · ¢/libra'),
               selected: _ny,
-              onSelected: (_) => setState(() => _ny = true),
+              onSelected: (_) => _trocar(true),
             ),
           ]),
           const SizedBox(height: 10),
@@ -108,7 +147,10 @@ class _ConversorBolsaState extends State<ConversorBolsa> {
                   hintText: _ny ? 'ex.: 305,45' : 'ex.: 386,25',
                   isDense: true,
                 ),
-                onChanged: (_) => setState(() {}),
+                onChanged: (_) {
+                  setState(() {});
+                  _guardar();
+                },
               ),
             ),
             const SizedBox(width: 10),

@@ -123,10 +123,12 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 8),
+          ConversorBolsa(dolarPtax: _dolar?.cotacaoVenda, mediaArabicaApp: _mediaArabica),
+          const SizedBox(height: 8),
+          _cardMediaApp(),
           _nota('Arábica B3 em US\$ por saca de 60 kg (atraso de cerca de 15 min). '
               'Arábica NY em centavos de dólar por libra-peso.'),
-          const SizedBox(height: 10),
-          ConversorBolsa(dolarPtax: _dolar?.cotacaoVenda, mediaArabicaApp: _mediaArabica),
           _titulo('Dólar'),
           _cardDolar(),
           const SizedBox(height: 10),
@@ -164,6 +166,28 @@ class _CotacoesScreenState extends State<CotacoesScreen> {
       );
 
   // ── Índice Café Conecta ─────────────────────────────────────────────
+  /// Preço médio do arábica no app, em R$, sem precisar digitar nada.
+  Widget _cardMediaApp() {
+    final m = _mediaArabica;
+    return Card(
+      color: CafeColors.cream,
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(children: [
+          const Icon(Icons.storefront_outlined, color: CafeColors.caramel),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text('Arábica no Café Conecta (média dos lotes)',
+                style: GoogleFonts.dmSans(fontSize: 13, color: CafeColors.darkRoast)),
+          ),
+          Text(m == null ? '—' : '${_saca.format(m)}/sc',
+              style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w700, color: CafeColors.mediumRoast)),
+        ]),
+      ),
+    );
+  }
+
   Widget _secaoIndice() {
     final i = _indice;
     if (i == null) {
