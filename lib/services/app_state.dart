@@ -27,7 +27,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Mensagem do último login que falhou por um motivo diferente de senha errada
+  /// (ex.: muitas tentativas). Nulo quando foi senha/e-mail incorreto.
+  String? ultimoErroLogin;
+
   Future<bool> login(String email, String senha) async {
+    ultimoErroLogin = null;
     try {
       final data = await ApiService.login(email, senha);
       ApiService.registrarVisita(); // conta o acesso do dia já com o usuário
@@ -37,7 +42,10 @@ class AppState extends ChangeNotifier {
       await refresh();
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (e) {
+      if (e is ApiException && e.statusCode != 401 && e.statusCode != 400) {
+        ultimoErroLogin = e.message;
+      }
       return false;
     }
   }

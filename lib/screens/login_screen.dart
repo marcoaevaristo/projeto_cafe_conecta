@@ -253,7 +253,8 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const MainScreen()));
     } else {
-      setState(() => _erro = 'E-mail ou senha incorretos.');
+      setState(() => _erro =
+          context.read<AppState>().ultimoErroLogin ?? 'E-mail ou senha incorretos.');
     }
   }
 }
