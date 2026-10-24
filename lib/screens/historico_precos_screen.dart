@@ -1,4 +1,5 @@
 // lib/screens/historico_precos_screen.dart — Melhoria 2
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -233,7 +234,7 @@ class _HistoricoPrecosScreenState extends State<HistoricoPrecosScreen> {
                                               showTitles: true,
                                               reservedSize: 52,
                                               getTitlesWidget: (v, _) => Text(
-                                                  'R\$${(v / 1000).toStringAsFixed(1)}k',
+                                                  'R\$ ${NumberFormat('#,##0', 'pt_BR').format(v)}',
                                                   style: GoogleFonts.dmSans(
                                                       fontSize: 9,
                                                       color: CafeColors

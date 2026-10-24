@@ -1,4 +1,5 @@
 // lib/screens/dashboard_screen.dart — v3: Dashboard analítico
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -374,9 +375,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         leftTitles: AxisTitles(
             sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 48,
+                reservedSize: 56,
                 getTitlesWidget: (v, _) => Text(
-                    'R\$${(v / 1000).toStringAsFixed(1)}k',
+                    'R\$ ${NumberFormat('#,##0', 'pt_BR').format(v)}',
                     style: GoogleFonts.dmSans(
                         fontSize: 9, color: CafeColors.lightRoast)))),
         bottomTitles: AxisTitles(
