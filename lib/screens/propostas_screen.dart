@@ -1,4 +1,5 @@
 // lib/screens/propostas_screen.dart — v3: Com contraproposta
+import 'contrato_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -284,6 +285,22 @@ class _PropostaCard extends StatelessWidget {
 
             if (proposta.status == 'aceita') ...[
               const SizedBox(height: 4),
+              SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => ContratoScreen(propostaId: proposta.id!))),
+                    icon: const Icon(Icons.description_outlined, size: 16),
+                    label: const Text('Contrato do negócio (PDF)'),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: CafeColors.caramel,
+                        foregroundColor: CafeColors.espresso,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8))),
+                  )),
+              const SizedBox(height: 6),
               SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(

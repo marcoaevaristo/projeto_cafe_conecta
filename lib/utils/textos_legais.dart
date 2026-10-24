@@ -62,6 +62,7 @@ const List<SecaoLegal> politicaDePrivacidade = [
   (titulo: '3. Para que usamos', paragrafos: [
     'Para criar e manter sua conta e permitir anunciar, negociar e conversar com outros usuários (execução do contrato).',
     'Para mostrar seus anúncios no catálogo. Seu nome, cidade e os dados do lote ficam visíveis para quem acessa o app; o telefone aparece só para usuários logados.',
+    'Quando uma proposta é aceita, nome, cidade, telefone e e-mail das duas partes aparecem no contrato do negócio, disponível apenas para elas.',
     'Para enviar avisos por e-mail sobre propostas, mensagens e alertas de preço. Você pode desligar esses avisos em Configurações.',
     'Para processar pagamentos de planos, prevenir fraudes, proteger as contas e cumprir obrigações legais.',
     'Para calcular estatísticas e o Índice Café Conecta, sempre de forma agregada, sem identificar quem negociou.',

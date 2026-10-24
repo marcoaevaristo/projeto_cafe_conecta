@@ -339,6 +339,13 @@ class ApiService {
     _decode(res);
   }
 
+  /// Dados da minuta de contrato de uma proposta aceita.
+  static Future<Map<String, dynamic>> getContrato(String propostaId) async {
+    final h = await _authHeaders();
+    final res = await http.get(Uri.parse('$_base/propostas/$propostaId/contrato'), headers: h);
+    return _decode(res);
+  }
+
   static Future<void> atualizarStatusProposta(String propostaId, String status) async {
     final h = await _authHeaders();
     final res = await http.patch(
